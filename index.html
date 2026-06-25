@@ -6,7 +6,1035 @@
     <title>InData</title>
     <link rel="preconnect" href="https://api.wikimedia.org" />
     <link rel="preconnect" href="https://it.wikipedia.org" />
-    <link rel="stylesheet" href="./styles.css" />
+    <style>
+:root {
+  color-scheme: light;
+  --ink: #172026;
+  --muted: #66717a;
+  --paper: #f7f8fb;
+  --surface: #ffffff;
+  --line: #dfe5ea;
+  --shadow: 0 18px 48px rgba(23, 32, 38, 0.10);
+  --green: #2d7a62;
+  --coral: #d65f49;
+  --blue: #2f68b8;
+  --gold: #b7791f;
+  --violet: #6b5aa6;
+  --radius: 8px;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--paper);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(120deg, rgba(47, 104, 184, 0.08), transparent 34%),
+    linear-gradient(245deg, rgba(214, 95, 73, 0.09), transparent 36%),
+    var(--paper);
+  letter-spacing: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+.app-shell {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px clamp(16px, 3vw, 36px);
+  background: rgba(247, 248, 251, 0.88);
+  border-bottom: 1px solid rgba(223, 229, 234, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 220px;
+  gap: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--ink), var(--green));
+  border-radius: var(--radius);
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand strong {
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.brand small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.date-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.icon-button,
+.text-button,
+.tab,
+.rail-day,
+.saved-day {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.icon-button {
+  display: grid;
+  width: 42px;
+  place-items: center;
+  flex: 0 0 42px;
+}
+
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-weight: 750;
+}
+
+.text-button.subtle {
+  background: #f2f5f6;
+}
+
+.text-button.is-saved {
+  color: #fff;
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.text-button.primary-action {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.account-button {
+  min-width: 104px;
+}
+
+.icon-button:hover,
+.text-button:hover,
+.tab:hover,
+.rail-day:hover,
+.saved-day:hover {
+  border-color: rgba(23, 32, 38, 0.28);
+  box-shadow: 0 8px 22px rgba(23, 32, 38, 0.08);
+}
+
+.date-field,
+.search-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.date-field {
+  padding: 0 10px;
+}
+
+.date-field input,
+.search-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.date-field input {
+  width: 146px;
+}
+
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(9, 13, 16, 0.54);
+  backdrop-filter: blur(12px);
+}
+
+.modal-layer[hidden] {
+  display: none;
+}
+
+.auth-card {
+  position: relative;
+  display: grid;
+  width: min(440px, 100%);
+  gap: 18px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.auth-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 44px;
+}
+
+.auth-heading h2,
+.auth-heading p {
+  margin: 0;
+}
+
+.auth-heading h2 {
+  font-size: 1.3rem;
+}
+
+.auth-heading p {
+  margin-top: 3px;
+  color: var(--muted);
+}
+
+.auth-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: #eef2f4;
+  border-radius: var(--radius);
+}
+
+.auth-switch button {
+  min-height: 38px;
+  border: 0;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.auth-switch button.is-active {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 8px 18px rgba(23, 32, 38, 0.08);
+}
+
+.auth-form,
+.memory-form {
+  display: grid;
+  gap: 12px;
+}
+
+.form-field {
+  display: grid;
+  gap: 7px;
+}
+
+.form-field span,
+.check-field span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  outline: 0;
+  background: #fff;
+  color: var(--ink);
+}
+
+.form-field input,
+.form-field select {
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 108px;
+  padding: 11px 12px;
+  line-height: 1.45;
+}
+
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.check-field input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+}
+
+.form-message {
+  min-height: 20px;
+  margin: 0;
+  color: var(--coral);
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+
+.day-hero {
+  position: relative;
+  display: grid;
+  min-height: clamp(360px, 47vh, 540px);
+  align-items: end;
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(23, 32, 38, 0.15);
+  background: #11181e;
+}
+
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.01);
+}
+
+.hero-media.is-blank {
+  background:
+    linear-gradient(135deg, rgba(47, 104, 184, 0.65), rgba(45, 122, 98, 0.78)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 34px),
+    #18232b;
+}
+
+.day-hero::after {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: 55%;
+  content: "";
+  background: linear-gradient(0deg, rgba(9, 13, 16, 0.72), rgba(9, 13, 16, 0));
+}
+
+.hero-copy {
+  width: min(860px, calc(100% - 32px));
+  padding: clamp(40px, 8vw, 92px) clamp(16px, 4vw, 42px);
+  color: #fff;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero-copy h1 {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 6.7rem);
+  line-height: 0.92;
+  letter-spacing: 0;
+}
+
+.hero-copy p:last-child {
+  max-width: 760px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.source-panel {
+  position: absolute;
+  right: clamp(16px, 3vw, 36px);
+  bottom: clamp(18px, 4vw, 42px);
+  display: inline-flex;
+  max-width: min(360px, calc(100% - 32px));
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #fff;
+  background: rgba(7, 11, 14, 0.54);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+}
+
+.source-panel span {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.84rem;
+}
+
+.source-panel a {
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.quick-days,
+.dashboard {
+  padding: 22px clamp(16px, 3vw, 36px);
+}
+
+.day-rail {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(82px, 1fr));
+  gap: 10px;
+}
+
+.rail-day {
+  display: grid;
+  min-width: 0;
+  min-height: 86px;
+  align-content: center;
+  gap: 2px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.rail-day span,
+.rail-day small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.rail-day strong {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.rail-day.is-active {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.rail-day.is-active span,
+.rail-day.is-active small {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.dashboard {
+  padding-top: 8px;
+  padding-bottom: 56px;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 8px;
+  padding: 0 14px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.tab.is-active {
+  color: #fff;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 22px;
+}
+
+.search-field {
+  width: min(520px, 100%);
+  padding: 0 13px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.72fr) minmax(220px, 0.8fr) minmax(220px, 0.8fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.overview-grid.is-hidden {
+  display: none;
+}
+
+.insight-block {
+  min-width: 0;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 28px rgba(23, 32, 38, 0.05);
+}
+
+.world-block {
+  border-top: 4px solid var(--green);
+}
+
+.saved-block {
+  border-top: 4px solid var(--coral);
+}
+
+.memory-block {
+  border-top: 4px solid var(--violet);
+}
+
+.block-heading,
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.block-heading h2,
+.section-title h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.block-heading svg {
+  color: var(--green);
+}
+
+.world-days,
+.saved-days,
+.memory-today {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.world-day,
+.saved-day {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  text-align: left;
+  text-decoration: none;
+  background: #f3f7f4;
+  border: 1px solid rgba(45, 122, 98, 0.18);
+  border-radius: var(--radius);
+}
+
+.world-day span {
+  font-weight: 850;
+}
+
+.world-day small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.saved-day {
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  color: var(--ink);
+}
+
+.memory-chip {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  min-height: 58px;
+  padding: 12px;
+  text-align: left;
+  background: #f5f2fb;
+  border: 1px solid rgba(107, 90, 166, 0.20);
+  border-radius: var(--radius);
+}
+
+.memory-chip span {
+  font-weight: 850;
+}
+
+.memory-chip small {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.metric {
+  display: grid;
+  min-height: 92px;
+  align-content: center;
+  gap: 3px;
+  padding: 12px;
+  background: #f5f7fa;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.metric svg {
+  color: var(--coral);
+}
+
+.metric strong {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.content-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.auth-gate {
+  display: grid;
+}
+
+.memory-workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.memory-form,
+.memory-list-section {
+  min-width: 0;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 28px rgba(23, 32, 38, 0.05);
+}
+
+.memory-form {
+  position: sticky;
+  top: 90px;
+}
+
+.memory-lists {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.memory-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.memory-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 12px;
+  align-items: start;
+  min-width: 0;
+  padding: 14px;
+  background: #fafbfc;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.memory-card h3,
+.memory-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.memory-card h3 {
+  margin-top: 8px;
+  font-size: 1.02rem;
+}
+
+.memory-card p {
+  margin-top: 7px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.memory-card small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.memory-delete {
+  color: var(--coral);
+}
+
+.category-section {
+  display: grid;
+  gap: 12px;
+}
+
+.section-title {
+  justify-content: flex-start;
+  padding-top: 8px;
+}
+
+.section-title svg {
+  color: var(--blue);
+}
+
+.section-title span {
+  display: inline-flex;
+  min-width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  color: var(--muted);
+  background: #eef2f4;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.info-card {
+  display: grid;
+  grid-template-rows: 186px 1fr;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 28px rgba(23, 32, 38, 0.055);
+}
+
+.card-image {
+  display: grid;
+  min-height: 186px;
+  place-items: center;
+  background-color: #e7ecef;
+  background-position: center;
+  background-size: cover;
+}
+
+.card-image.is-empty {
+  color: rgba(23, 32, 38, 0.35);
+  background:
+    linear-gradient(135deg, rgba(183, 121, 31, 0.18), rgba(47, 104, 184, 0.14)),
+    #edf1f2;
+}
+
+.card-image.is-empty svg {
+  width: 44px;
+  height: 44px;
+}
+
+.card-body {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 10px;
+  padding: 15px;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.year-pill,
+.category-pill {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.year-pill {
+  color: #fff;
+  background: var(--ink);
+}
+
+.category-pill {
+  color: var(--blue);
+  background: rgba(47, 104, 184, 0.1);
+}
+
+.info-card h3 {
+  margin: 0;
+  font-size: 1.06rem;
+  line-height: 1.24;
+  overflow-wrap: anywhere;
+}
+
+.info-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  color: var(--green);
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.empty-copy,
+.empty-state p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.empty-state {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.loading-grid span {
+  min-height: 260px;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent),
+    #e8edf1;
+  background-size: 200% 100%;
+  animation: loading 1.1s linear infinite;
+}
+
+@keyframes loading {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+@media (max-width: 1040px) {
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .world-block {
+    grid-column: 1 / -1;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .memory-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .memory-form {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    position: static;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .brand {
+    width: 100%;
+  }
+
+  .date-tools {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+
+  .date-field input {
+    width: 100%;
+  }
+
+  .date-tools .text-button {
+    grid-column: 1 / -1;
+  }
+
+  .day-hero {
+    min-height: 470px;
+  }
+
+  .hero-copy {
+    width: 100%;
+    padding-bottom: 116px;
+  }
+
+  .source-panel {
+    right: 16px;
+    bottom: 18px;
+    left: 16px;
+    justify-content: space-between;
+  }
+
+  .day-rail {
+    grid-template-columns: repeat(7, minmax(68px, 1fr));
+    overflow-x: auto;
+  }
+
+  .rail-day {
+    min-height: 78px;
+  }
+
+  .controls-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .search-field,
+  .controls-row .text-button {
+    width: 100%;
+  }
+
+  .overview-grid,
+  .card-grid,
+  .loading-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .date-tools {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+
+  .hero-copy h1 {
+    font-size: 3.1rem;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+    </style>
   </head>
   <body>
     <div class="app-shell">
@@ -34,6 +1062,10 @@
             <i data-lucide="sparkles" aria-hidden="true"></i>
             Oggi
           </button>
+          <button class="text-button account-button" id="accountButton" type="button">
+            <i data-lucide="user-round" aria-hidden="true"></i>
+            Accedi
+          </button>
         </div>
       </header>
 
@@ -42,8 +1074,8 @@
           <div class="hero-media" id="heroMedia" aria-hidden="true"></div>
           <div class="hero-copy">
             <p class="eyebrow" id="weekdayLabel">Oggi</p>
-            <h1 id="dayTitle">Almanacco del giorno</h1>
-            <p id="daySummary">Caricamento della giornata...</p>
+            <h1 id="dayTitle">InData</h1>
+            <p id="daySummary">La giornata raccontata in un minuto.</p>
           </div>
           <aside class="source-panel" aria-label="Stato dei dati">
             <span id="sourceState">Connessione alla fonte</span>
@@ -76,6 +1108,10 @@
             <button class="tab" type="button" data-tab="deaths">
               <i data-lucide="flower-2" aria-hidden="true"></i>
               Morti
+            </button>
+            <button class="tab" type="button" data-tab="memories">
+              <i data-lucide="heart" aria-hidden="true"></i>
+              Ricordi
             </button>
           </nav>
 
@@ -114,11 +1150,59 @@
               </div>
               <div id="savedDays" class="saved-days"></div>
             </article>
+
+            <article class="insight-block memory-block">
+              <div class="block-heading">
+                <i data-lucide="heart" aria-hidden="true"></i>
+                <h2>Ricordi personali</h2>
+              </div>
+              <div id="memoryToday" class="memory-today"></div>
+            </article>
           </section>
 
           <section class="content-panel is-visible" id="cardsPanel" aria-live="polite"></section>
         </section>
       </main>
+    </div>
+
+    <div class="modal-layer" id="authModal" hidden>
+      <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <button class="icon-button modal-close" id="authClose" type="button" title="Chiudi" aria-label="Chiudi">
+          <i data-lucide="x"></i>
+        </button>
+        <div class="auth-heading">
+          <span class="brand-mark" aria-hidden="true">ID</span>
+          <div>
+            <h2 id="authTitle">InData</h2>
+            <p>La giornata raccontata in un minuto</p>
+          </div>
+        </div>
+
+        <div class="auth-switch" role="tablist" aria-label="Accesso">
+          <button class="is-active" id="authLoginTab" type="button">Accedi</button>
+          <button id="authRegisterTab" type="button">Registrati</button>
+        </div>
+
+        <form class="auth-form" id="authForm">
+          <label class="form-field" id="nameField">
+            <span>Nome</span>
+            <input id="authName" type="text" autocomplete="name" />
+          </label>
+          <label class="form-field">
+            <span>Email</span>
+            <input id="authEmail" type="email" autocomplete="email" required />
+          </label>
+          <label class="form-field">
+            <span>Password</span>
+            <input id="authPassword" type="password" autocomplete="current-password" required minlength="4" />
+          </label>
+          <p class="form-message" id="authMessage" role="status"></p>
+          <button class="text-button primary-action" id="authSubmit" type="submit">
+            <i data-lucide="log-in" aria-hidden="true"></i>
+            Accedi
+          </button>
+        </form>
+      </section>
     </div>
 
     <template id="cardTemplate">
@@ -140,6 +1224,1241 @@
     </template>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="./app.js"></script>
+    <script>
+const WIKI_LANGUAGES = ["it", "en"];
+const API_HOSTS = [
+  (lang, month, day) => `https://api.wikimedia.org/feed/v1/wikipedia/${lang}/onthisday/all/${month}/${day}`,
+  (lang, month, day) => `https://${lang}.wikipedia.org/api/rest_v1/feed/onthisday/all/${month}/${day}`,
+];
+
+const CATEGORY_META = {
+  holidays: {
+    label: "Giornate",
+    singular: "Ricorrenza",
+    icon: "globe-2",
+  },
+  events: {
+    label: "Storia",
+    singular: "Evento",
+    icon: "landmark",
+  },
+  births: {
+    label: "Nati",
+    singular: "Nascita",
+    icon: "cake",
+  },
+  deaths: {
+    label: "Morti",
+    singular: "Scomparsa",
+    icon: "flower-2",
+  },
+  selected: {
+    label: "In evidenza",
+    singular: "Focus",
+    icon: "sparkles",
+  },
+  memories: {
+    label: "Ricordi",
+    singular: "Ricordo",
+    icon: "heart",
+  },
+};
+
+const CATEGORY_ORDER = ["holidays", "events", "births", "deaths", "selected"];
+const FILL_LIMITS = {
+  selected: 6,
+  holidays: 8,
+  events: 12,
+  births: 20,
+  deaths: 20,
+};
+
+const WORLD_DAY_TERMS = [
+  "giornata mondiale",
+  "giornata internazionale",
+  "world day",
+  "international day",
+  "united nations",
+  "nazioni unite",
+  "onu",
+];
+
+const FALLBACK_DATA = {
+  "06-25": {
+    language: "local",
+    sourceUrl: "https://www.mediawiki.org/wiki/Wikimedia_APIs",
+    holidays: [
+      {
+        year: null,
+        text: "Giornata mondiale del marittimo, promossa dall'Organizzazione marittima internazionale.",
+        pages: [
+          {
+            title: "Giornata mondiale del marittimo",
+            description: "Ricorrenza internazionale",
+            content_urls: { desktop: { page: "https://www.imo.org/en/About/Events/Pages/Day-of-the-Seafarer.aspx" } },
+          },
+        ],
+      },
+    ],
+    events: [
+      {
+        year: 1950,
+        text: "Inizia la guerra di Corea, uno degli snodi principali della Guerra fredda.",
+        pages: [
+          {
+            title: "Guerra di Corea",
+            description: "Conflitto combattuto nella penisola coreana",
+            thumbnail: { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Korean_War_Montage_2.png/640px-Korean_War_Montage_2.png" },
+            content_urls: { desktop: { page: "https://it.wikipedia.org/wiki/Guerra_di_Corea" } },
+          },
+        ],
+      },
+      {
+        year: 1991,
+        text: "Slovenia e Croazia dichiarano l'indipendenza dalla Jugoslavia.",
+        pages: [
+          {
+            title: "Dissoluzione della Jugoslavia",
+            description: "Processo storico e politico europeo",
+            thumbnail: { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Flag_map_of_Yugoslavia_%281943-1992%29.svg/640px-Flag_map_of_Yugoslavia_%281943-1992%29.svg.png" },
+            content_urls: { desktop: { page: "https://it.wikipedia.org/wiki/Dissoluzione_della_Jugoslavia" } },
+          },
+        ],
+      },
+    ],
+    births: [
+      {
+        year: 1903,
+        text: "Nasce George Orwell, scrittore e giornalista britannico.",
+        pages: [
+          {
+            title: "George Orwell",
+            description: "Scrittore e giornalista britannico",
+            thumbnail: { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/George_Orwell_press_photo.jpg/480px-George_Orwell_press_photo.jpg" },
+            content_urls: { desktop: { page: "https://it.wikipedia.org/wiki/George_Orwell" } },
+          },
+        ],
+      },
+    ],
+    deaths: [
+      {
+        year: 1997,
+        text: "Muore Jacques-Yves Cousteau, esploratore, oceanografo e divulgatore francese.",
+        pages: [
+          {
+            title: "Jacques-Yves Cousteau",
+            description: "Esploratore e oceanografo francese",
+            thumbnail: { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Jacques-Yves_Cousteau_1972.jpg/480px-Jacques-Yves_Cousteau_1972.jpg" },
+            content_urls: { desktop: { page: "https://it.wikipedia.org/wiki/Jacques-Yves_Cousteau" } },
+          },
+        ],
+      },
+    ],
+    selected: [],
+  },
+};
+
+const elements = {
+  datePicker: document.querySelector("#datePicker"),
+  previousDay: document.querySelector("#previousDay"),
+  nextDay: document.querySelector("#nextDay"),
+  todayButton: document.querySelector("#todayButton"),
+  accountButton: document.querySelector("#accountButton"),
+  dayTitle: document.querySelector("#dayTitle"),
+  daySummary: document.querySelector("#daySummary"),
+  weekdayLabel: document.querySelector("#weekdayLabel"),
+  heroMedia: document.querySelector("#heroMedia"),
+  sourceState: document.querySelector("#sourceState"),
+  sourceLink: document.querySelector("#sourceLink"),
+  dayRail: document.querySelector("#dayRail"),
+  searchInput: document.querySelector("#searchInput"),
+  saveDay: document.querySelector("#saveDay"),
+  savedDays: document.querySelector("#savedDays"),
+  metrics: document.querySelector("#metrics"),
+  worldDays: document.querySelector("#worldDays"),
+  memoryToday: document.querySelector("#memoryToday"),
+  cardsPanel: document.querySelector("#cardsPanel"),
+  overviewPanel: document.querySelector("#overviewPanel"),
+  tabs: [...document.querySelectorAll(".tab")],
+  cardTemplate: document.querySelector("#cardTemplate"),
+  authModal: document.querySelector("#authModal"),
+  authClose: document.querySelector("#authClose"),
+  authLoginTab: document.querySelector("#authLoginTab"),
+  authRegisterTab: document.querySelector("#authRegisterTab"),
+  authForm: document.querySelector("#authForm"),
+  authName: document.querySelector("#authName"),
+  authEmail: document.querySelector("#authEmail"),
+  authPassword: document.querySelector("#authPassword"),
+  authMessage: document.querySelector("#authMessage"),
+  authSubmit: document.querySelector("#authSubmit"),
+  nameField: document.querySelector("#nameField"),
+};
+
+const state = {
+  date: new Date(),
+  data: null,
+  activeTab: "overview",
+  search: "",
+  saved: loadSavedDays(),
+  users: loadUsers(),
+  currentUser: loadCurrentUser(),
+  memories: [],
+  authMode: "login",
+  requestId: 0,
+};
+
+function init() {
+  state.memories = loadMemories();
+  elements.datePicker.value = toInputDate(state.date);
+  bindEvents();
+  buildDayRail();
+  renderAccount();
+  renderSavedDays();
+  renderMemoryToday();
+  loadDay(state.date);
+  paintIcons();
+}
+
+function bindEvents() {
+  elements.previousDay.addEventListener("click", () => shiftDate(-1));
+  elements.nextDay.addEventListener("click", () => shiftDate(1));
+  elements.todayButton.addEventListener("click", () => setDate(new Date()));
+  elements.accountButton.addEventListener("click", () => {
+    if (state.currentUser) {
+      signOut();
+    } else {
+      openAuth("login");
+    }
+  });
+  elements.datePicker.addEventListener("change", (event) => {
+    const nextDate = parseInputDate(event.target.value);
+    if (nextDate) setDate(nextDate);
+  });
+
+  elements.searchInput.addEventListener("input", (event) => {
+    state.search = event.target.value.trim().toLowerCase();
+    renderPanels();
+  });
+
+  elements.tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      setActiveTab(tab.dataset.tab);
+    });
+  });
+
+  elements.saveDay.addEventListener("click", () => {
+    const key = keyFromDate(state.date);
+    const label = formatDayTitle(state.date);
+    if (state.saved.some((item) => item.key === key)) {
+      state.saved = state.saved.filter((item) => item.key !== key);
+    } else {
+      state.saved = [{ key, label, value: toInputDate(state.date) }, ...state.saved].slice(0, 8);
+    }
+    saveSavedDays();
+    renderSavedDays();
+    updateSaveButton();
+  });
+
+  elements.authClose.addEventListener("click", closeAuth);
+  elements.authModal.addEventListener("click", (event) => {
+    if (event.target === elements.authModal) closeAuth();
+  });
+  elements.authLoginTab.addEventListener("click", () => setAuthMode("login"));
+  elements.authRegisterTab.addEventListener("click", () => setAuthMode("register"));
+  elements.authForm.addEventListener("submit", handleAuthSubmit);
+}
+
+function shiftDate(offset) {
+  const next = new Date(state.date);
+  next.setDate(next.getDate() + offset);
+  setDate(next);
+}
+
+function setDate(nextDate) {
+  state.date = nextDate;
+  elements.datePicker.value = toInputDate(state.date);
+  elements.searchInput.value = "";
+  state.search = "";
+  buildDayRail();
+  loadDay(state.date);
+}
+
+async function loadDay(date) {
+  const requestId = ++state.requestId;
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const cacheKey = `almanacco.${month}-${day}`;
+
+  setLoadingState(date);
+
+  const cached = readCache(cacheKey);
+  if (cached) {
+    state.data = cached;
+    if (requestId === state.requestId) renderAll({ stale: true });
+  }
+
+  try {
+    const data = await fetchOnThisDay(month, day);
+    if (requestId !== state.requestId) return;
+    state.data = normalizeData(data, month, day);
+    writeCache(cacheKey, state.data);
+    renderAll({ stale: false });
+  } catch (error) {
+    if (requestId !== state.requestId) return;
+    if (!cached) {
+      state.data = normalizeData(FALLBACK_DATA[`${month}-${day}`] || makeEmptyDay(month, day), month, day);
+      renderAll({ fallback: true });
+    } else {
+      renderAll({ stale: true });
+    }
+  }
+}
+
+async function fetchOnThisDay(month, day) {
+  const payloads = [];
+  let lastError;
+
+  for (const language of WIKI_LANGUAGES) {
+    try {
+      payloads.push(await fetchLanguagePayload(language, month, day));
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (!payloads.length) {
+    throw lastError || new Error("Fonte non disponibile");
+  }
+
+  return mergeLanguagePayloads(payloads);
+}
+
+async function fetchLanguagePayload(language, month, day) {
+  const attempts = [];
+  for (const host of API_HOSTS) {
+    attempts.push({ language, url: host(language, month, day) });
+  }
+
+  let lastError;
+  for (const attempt of attempts) {
+    try {
+      const response = await fetch(attempt.url, {
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      return { ...payload, language: attempt.language, sourceUrl: attempt.url };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Fonte non disponibile");
+}
+
+function mergeLanguagePayloads(payloads) {
+  const primary = payloads[0];
+  const merged = {
+    ...primary,
+    language: payloads.map((payload) => payload.language).join("+"),
+    sourceUrl: primary.sourceUrl || "https://www.mediawiki.org/wiki/Wikimedia_APIs",
+  };
+
+  for (const category of CATEGORY_ORDER) {
+    const primaryItems = Array.isArray(primary[category]) ? primary[category] : [];
+    const minimum = FILL_LIMITS[category] || 8;
+    if (primaryItems.length >= minimum || payloads.length === 1) {
+      merged[category] = primaryItems;
+      continue;
+    }
+
+    const candidates = payloads.flatMap((payload) => Array.isArray(payload[category]) ? payload[category] : []);
+    merged[category] = mergeItems(primaryItems, candidates).slice(0, Math.max(minimum, primaryItems.length));
+  }
+
+  return merged;
+}
+
+function mergeItems(primaryItems, candidates) {
+  const merged = [];
+  const seen = new Set();
+
+  for (const item of [...primaryItems, ...candidates]) {
+    if (!item?.text) continue;
+    const identity = `${item.year || ""}-${item.text}`.toLowerCase();
+    if (seen.has(identity)) continue;
+    seen.add(identity);
+    merged.push(item);
+  }
+
+  return merged;
+}
+
+function normalizeData(raw, month, day) {
+  const sourceUrl = raw.sourceUrl || "https://www.mediawiki.org/wiki/Wikimedia_APIs";
+  const buckets = CATEGORY_ORDER.reduce((accumulator, key) => {
+    accumulator[key] = dedupeItems(Array.isArray(raw[key]) ? raw[key] : [], key);
+    return accumulator;
+  }, {});
+
+  const allCards = Object.entries(buckets).flatMap(([category, items]) =>
+    items.map((item) => toCard(item, category))
+  );
+
+  const heroCard = pickHeroCard(allCards);
+  return {
+    month,
+    day,
+    language: raw.language || "unknown",
+    sourceUrl,
+    ...buckets,
+    cards: allCards,
+    heroCard,
+  };
+}
+
+function dedupeItems(items, category) {
+  const seen = new Set();
+  return items
+    .filter((item) => item && item.text)
+    .filter((item) => {
+      const identity = `${category}-${item.year || ""}-${item.text}`.toLowerCase();
+      if (seen.has(identity)) return false;
+      seen.add(identity);
+      return true;
+    })
+    .slice(0, category === "holidays" ? 16 : 40);
+}
+
+function toCard(item, category) {
+  const page = Array.isArray(item.pages) ? item.pages.find(Boolean) : null;
+  const title = page?.normalizedtitle || page?.title || item.text.split(",")[0] || CATEGORY_META[category].singular;
+  const description = cleanText(page?.description || page?.extract || item.text);
+  const image = page?.thumbnail?.source || page?.originalimage?.source || "";
+  const url = page?.content_urls?.desktop?.page || page?.content_urls?.mobile?.page || "";
+  const year = normalizeYear(item.year);
+  return {
+    category,
+    title: cleanText(title),
+    text: cleanText(item.text),
+    description,
+    image,
+    url,
+    year,
+    sortYear: getSortYear(year),
+  };
+}
+
+function normalizeYear(year) {
+  if (Number.isFinite(year)) return year;
+  if (typeof year === "string" && year.trim() !== "" && Number.isFinite(Number(year))) return Number(year);
+  return null;
+}
+
+function getSortYear(year) {
+  return Number.isFinite(year) ? year : 99999;
+}
+
+function pickHeroCard(cards) {
+  const imageCard = cards.find((card) => card.category === "events" && card.image) ||
+    cards.find((card) => card.category === "births" && card.image) ||
+    cards.find((card) => card.category === "deaths" && card.image) ||
+    cards.find((card) => card.image);
+  return imageCard || cards[0] || null;
+}
+
+function renderAll(flags = {}) {
+  renderHero(flags);
+  renderMetrics();
+  renderWorldDays();
+  renderMemoryToday();
+  renderPanels();
+  renderSavedDays();
+  updateSaveButton();
+  paintIcons();
+}
+
+function renderHero(flags) {
+  const date = state.date;
+  const title = formatDayTitle(date);
+  const weekday = formatWeekday(date);
+  const hero = state.data?.heroCard;
+
+  elements.weekdayLabel.textContent = weekday;
+  elements.dayTitle.textContent = title;
+
+  if (hero) {
+    const category = CATEGORY_META[hero.category]?.singular || "Almanacco";
+    const year = hero.year ? `${hero.year}: ` : "";
+    elements.daySummary.textContent = `${category} - ${year}${hero.text}`;
+    if (hero.image) {
+      elements.heroMedia.style.backgroundImage = `linear-gradient(90deg, rgba(15, 20, 24, 0.78), rgba(15, 20, 24, 0.30)), url("${hero.image}")`;
+      elements.heroMedia.classList.remove("is-blank");
+    } else {
+      elements.heroMedia.style.backgroundImage = "";
+      elements.heroMedia.classList.add("is-blank");
+    }
+  } else {
+    elements.daySummary.textContent = "Nessun dato disponibile per questa data.";
+    elements.heroMedia.style.backgroundImage = "";
+    elements.heroMedia.classList.add("is-blank");
+  }
+
+  if (flags.fallback) {
+    elements.sourceState.textContent = "Dati locali di riserva";
+  } else if (flags.stale) {
+    elements.sourceState.textContent = "Dati in cache";
+  } else {
+    elements.sourceState.textContent = getSourceLabel(state.data?.language);
+  }
+
+  elements.sourceLink.href = state.data?.sourceUrl || "https://www.mediawiki.org/wiki/Wikimedia_APIs";
+}
+
+function renderMetrics() {
+  const data = state.data || makeEmptyDay();
+  const metrics = [
+    { label: "Ricorrenze", value: data.holidays.length, icon: "globe-2" },
+    { label: "Eventi", value: data.events.length, icon: "landmark" },
+    { label: "Nati", value: data.births.length, icon: "cake" },
+    { label: "Morti", value: data.deaths.length, icon: "flower-2" },
+  ];
+
+  elements.metrics.innerHTML = metrics
+    .map(
+      (metric) => `
+        <div class="metric">
+          <i data-lucide="${metric.icon}" aria-hidden="true"></i>
+          <strong>${metric.value}</strong>
+          <span>${metric.label}</span>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function renderWorldDays() {
+  const holidays = (state.data?.holidays || []).map((item) => toCard(item, "holidays"));
+  const worldDays = holidays.filter((item) => isWorldDay(item.text));
+  const featured = worldDays.length ? worldDays : holidays.slice(0, 3);
+
+  if (!featured.length) {
+    elements.worldDays.innerHTML = `<p class="empty-copy">Nessuna ricorrenza trovata per questa data.</p>`;
+    return;
+  }
+
+  elements.worldDays.innerHTML = featured
+    .map((item) => {
+      const href = item.url || state.data?.sourceUrl || "#";
+      return `
+        <a class="world-day" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
+          <span>${escapeHtml(item.title || "Ricorrenza")}</span>
+          <small>${escapeHtml(item.text)}</small>
+        </a>
+      `;
+    })
+    .join("");
+}
+
+function isWorldDay(text) {
+  const lowerText = String(text || "").toLowerCase();
+  const hasExactSignal = WORLD_DAY_TERMS.some((term) => lowerText.includes(term));
+  const hasDaySignal = lowerText.includes("giornata") || lowerText.includes("day");
+  const hasGlobalSignal = ["mondiale", "internazionale", "international", "world"].some((term) => lowerText.includes(term));
+  return hasExactSignal || (hasDaySignal && hasGlobalSignal);
+}
+
+function renderMemoryToday() {
+  if (!state.currentUser) {
+    elements.memoryToday.innerHTML = `
+      <button class="saved-day" type="button" data-auth-open>
+        <i data-lucide="log-in" aria-hidden="true"></i>
+        <span>Accedi</span>
+      </button>
+    `;
+    bindMemoryShortcutButtons();
+    paintIcons();
+    return;
+  }
+
+  const matches = getMemoriesForDate(state.date).slice(0, 3);
+  if (!matches.length) {
+    elements.memoryToday.innerHTML = `<p class="empty-copy">Nessun ricordo per questa data.</p>`;
+    return;
+  }
+
+  elements.memoryToday.innerHTML = matches
+    .map((memory) => `
+      <button class="memory-chip" type="button" data-open-memories>
+        <span>${escapeHtml(memory.title)}</span>
+        <small>${escapeHtml(getMemoryAgeLabel(memory, state.date))}</small>
+      </button>
+    `)
+    .join("");
+  bindMemoryShortcutButtons();
+}
+
+function renderMemoryWorkspace() {
+  if (!state.currentUser) {
+    elements.cardsPanel.innerHTML = `
+      <section class="auth-gate">
+        <div class="empty-state">
+          <i data-lucide="heart" aria-hidden="true"></i>
+          <p>Accedi per salvare i tuoi ricordi personali.</p>
+          <button class="text-button primary-action" type="button" data-auth-open>
+            <i data-lucide="log-in" aria-hidden="true"></i>
+            Accedi
+          </button>
+        </div>
+      </section>
+    `;
+    bindMemoryShortcutButtons();
+    paintIcons();
+    return;
+  }
+
+  const todayMemories = getMemoriesForDate(state.date);
+  const allMemories = [...state.memories].sort((a, b) => b.date.localeCompare(a.date));
+
+  elements.cardsPanel.innerHTML = `
+    <section class="memory-workspace">
+      <form class="memory-form" id="memoryForm">
+        <div class="section-title">
+          <i data-lucide="heart-plus" aria-hidden="true"></i>
+          <h2>Nuovo ricordo</h2>
+        </div>
+        <label class="form-field">
+          <span>Titolo</span>
+          <input id="memoryTitle" type="text" maxlength="90" required placeholder="Es. Primo giorno del progetto" />
+        </label>
+        <label class="form-field">
+          <span>Data</span>
+          <input id="memoryDate" type="date" required value="${toInputDate(state.date)}" />
+        </label>
+        <label class="form-field">
+          <span>Etichetta</span>
+          <select id="memoryKind">
+            <option value="personale">Personale</option>
+            <option value="famiglia">Famiglia</option>
+            <option value="lavoro">Lavoro</option>
+            <option value="viaggio">Viaggio</option>
+            <option value="traguardo">Traguardo</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>Dettaglio</span>
+          <textarea id="memoryNotes" rows="4" maxlength="420" placeholder="Una nota breve da ritrovare fra un anno"></textarea>
+        </label>
+        <label class="check-field">
+          <input id="memoryRepeat" type="checkbox" checked />
+          <span>Ricordamelo ogni anno</span>
+        </label>
+        <button class="text-button primary-action" type="submit">
+          <i data-lucide="save" aria-hidden="true"></i>
+          Salva ricordo
+        </button>
+      </form>
+
+      <div class="memory-lists">
+        ${renderMemoryCollection("Ricordi di questa data", todayMemories, "Nessun ricordo per questa data.")}
+        ${renderMemoryCollection("Archivio personale", allMemories, "Archivio vuoto.")}
+      </div>
+    </section>
+  `;
+
+  bindMemoryForm();
+  paintIcons();
+}
+
+function renderMemoryCollection(title, memories, emptyText) {
+  return `
+    <section class="memory-list-section">
+      <div class="section-title">
+        <i data-lucide="calendar-heart" aria-hidden="true"></i>
+        <h2>${escapeHtml(title)}</h2>
+        <span>${memories.length}</span>
+      </div>
+      <div class="memory-list">
+        ${memories.length ? memories.map(renderMemoryCard).join("") : `<p class="empty-copy">${escapeHtml(emptyText)}</p>`}
+      </div>
+    </section>
+  `;
+}
+
+function renderMemoryCard(memory) {
+  const date = parseInputDate(memory.date);
+  const label = date ? formatDayTitle(date) : memory.date;
+  const note = memory.notes ? `<p>${escapeHtml(memory.notes)}</p>` : "";
+  return `
+    <article class="memory-card">
+      <div>
+        <div class="card-meta">
+          <span class="year-pill">${escapeHtml(String(memory.year))}</span>
+          <span class="category-pill">${escapeHtml(memory.kind || "personale")}</span>
+        </div>
+        <h3>${escapeHtml(memory.title)}</h3>
+        ${note}
+        <small>${escapeHtml(label)} - ${escapeHtml(getMemoryAgeLabel(memory, state.date))}</small>
+      </div>
+      <button class="icon-button memory-delete" type="button" title="Elimina" aria-label="Elimina" data-memory-id="${escapeAttribute(memory.id)}">
+        <i data-lucide="trash-2" aria-hidden="true"></i>
+      </button>
+    </article>
+  `;
+}
+
+function bindMemoryForm() {
+  const form = document.querySelector("#memoryForm");
+  if (!form) return;
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const dateValue = document.querySelector("#memoryDate")?.value;
+    const date = parseInputDate(dateValue);
+    const title = document.querySelector("#memoryTitle")?.value.trim();
+    if (!date || !title) return;
+
+    const memory = {
+      id: makeId("memory"),
+      title,
+      date: dateValue,
+      year: date.getFullYear(),
+      monthDay: keyFromDate(date),
+      kind: document.querySelector("#memoryKind")?.value || "personale",
+      notes: document.querySelector("#memoryNotes")?.value.trim() || "",
+      repeatYearly: Boolean(document.querySelector("#memoryRepeat")?.checked),
+      createdAt: new Date().toISOString(),
+    };
+
+    state.memories = [memory, ...state.memories];
+    saveMemories();
+    setDate(date);
+    setActiveTab("memories");
+  });
+
+  document.querySelectorAll("[data-memory-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.memories = state.memories.filter((memory) => memory.id !== button.dataset.memoryId);
+      saveMemories();
+      renderMemoryToday();
+      renderMemoryWorkspace();
+    });
+  });
+}
+
+function bindMemoryShortcutButtons() {
+  document.querySelectorAll("[data-auth-open]").forEach((button) => {
+    button.addEventListener("click", () => openAuth("login"));
+  });
+  document.querySelectorAll("[data-open-memories]").forEach((button) => {
+    button.addEventListener("click", () => setActiveTab("memories"));
+  });
+}
+
+function getMemoriesForDate(date) {
+  const selectedKey = keyFromDate(date);
+  const selectedYear = date.getFullYear();
+  const selectedInput = toInputDate(date);
+  return state.memories
+    .filter((memory) => {
+      if (memory.repeatYearly) {
+        return memory.monthDay === selectedKey && Number(memory.year) <= selectedYear;
+      }
+      return memory.date === selectedInput;
+    })
+    .sort((a, b) => Number(b.year) - Number(a.year));
+}
+
+function getMemoryAgeLabel(memory, date) {
+  if (!memory.repeatYearly) return "Solo questa data";
+  const age = date.getFullYear() - Number(memory.year);
+  if (age > 1) return `${age} anni fa`;
+  if (age === 1) return "Un anno fa";
+  if (age === 0) return "Salvato per questo giorno";
+  return "In programma";
+}
+
+function setActiveTab(tabName) {
+  state.activeTab = tabName;
+  elements.tabs.forEach((item) => item.classList.toggle("is-active", item.dataset.tab === tabName));
+  renderPanels();
+}
+
+function renderPanels() {
+  const isOverview = state.activeTab === "overview";
+  elements.overviewPanel.classList.toggle("is-hidden", !isOverview);
+  elements.cardsPanel.classList.toggle("is-visible", true);
+
+  if (state.activeTab === "memories") {
+    renderMemoryWorkspace();
+    return;
+  }
+
+  const cards = getVisibleCards();
+  if (!cards.length) {
+    elements.cardsPanel.innerHTML = `
+      <div class="empty-state">
+        <i data-lucide="search-x" aria-hidden="true"></i>
+        <p>Nessun risultato per questa selezione.</p>
+      </div>
+    `;
+    paintIcons();
+    return;
+  }
+
+  const grouped = groupCards(cards);
+  elements.cardsPanel.innerHTML = CATEGORY_ORDER
+    .filter((category) => grouped[category]?.length)
+    .map((category) => renderCategory(category, grouped[category]))
+    .join("");
+  paintIcons();
+}
+
+function getVisibleCards() {
+  const data = state.data || makeEmptyDay();
+  const base = state.activeTab === "overview"
+    ? [...data.holidays.map((item) => toCard(item, "holidays")).slice(0, 5), ...data.events.map((item) => toCard(item, "events")).slice(0, 8), ...data.births.map((item) => toCard(item, "births")).slice(0, 6), ...data.deaths.map((item) => toCard(item, "deaths")).slice(0, 6)]
+    : (data[state.activeTab] || []).map((item) => toCard(item, state.activeTab));
+
+  const filtered = state.search
+    ? base.filter((card) => [card.title, card.text, card.description, card.year].join(" ").toLowerCase().includes(state.search))
+    : base;
+
+  return filtered.sort((a, b) => a.sortYear - b.sortYear);
+}
+
+function groupCards(cards) {
+  return cards.reduce((accumulator, card) => {
+    if (!accumulator[card.category]) accumulator[card.category] = [];
+    accumulator[card.category].push(card);
+    return accumulator;
+  }, {});
+}
+
+function renderCategory(category, cards) {
+  const meta = CATEGORY_META[category] || CATEGORY_META.events;
+  return `
+    <section class="category-section" aria-labelledby="${category}-heading">
+      <div class="section-title">
+        <i data-lucide="${meta.icon}" aria-hidden="true"></i>
+        <h2 id="${category}-heading">${meta.label}</h2>
+        <span>${cards.length}</span>
+      </div>
+      <div class="card-grid">
+        ${cards.map(renderCard).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderCard(card) {
+  const meta = CATEGORY_META[card.category] || CATEGORY_META.events;
+  const imageStyle = card.image ? `style="background-image: url('${escapeAttribute(card.image)}')"` : "";
+  const year = card.year || "Senza data";
+  const href = card.url || state.data?.sourceUrl || "#";
+
+  return `
+    <article class="info-card">
+      <div class="card-image ${card.image ? "" : "is-empty"}" ${imageStyle} aria-hidden="true">
+        ${card.image ? "" : `<i data-lucide="${meta.icon}"></i>`}
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="year-pill">${escapeHtml(String(year))}</span>
+          <span class="category-pill">${meta.singular}</span>
+        </div>
+        <h3>${escapeHtml(card.title)}</h3>
+        <p>${escapeHtml(card.text)}</p>
+        <a class="card-link" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
+          Fonte
+          <i data-lucide="external-link" aria-hidden="true"></i>
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+function buildDayRail() {
+  const start = new Date(state.date);
+  start.setDate(start.getDate() - 3);
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    return date;
+  });
+
+  elements.dayRail.innerHTML = days
+    .map((date) => {
+      const active = keyFromDate(date) === keyFromDate(state.date);
+      return `
+        <button class="rail-day ${active ? "is-active" : ""}" type="button" data-date="${toInputDate(date)}">
+          <span>${formatShortWeekday(date)}</span>
+          <strong>${date.getDate()}</strong>
+          <small>${formatShortMonth(date)}</small>
+        </button>
+      `;
+    })
+    .join("");
+
+  elements.dayRail.querySelectorAll(".rail-day").forEach((button) => {
+    button.addEventListener("click", () => setDate(parseInputDate(button.dataset.date)));
+  });
+}
+
+function renderSavedDays() {
+  if (!state.saved.length) {
+    elements.savedDays.innerHTML = `<p class="empty-copy">Nessuna giornata salvata.</p>`;
+    return;
+  }
+
+  elements.savedDays.innerHTML = state.saved
+    .map(
+      (item) => `
+        <button class="saved-day" type="button" data-date="${escapeAttribute(item.value)}">
+          <i data-lucide="calendar-check" aria-hidden="true"></i>
+          <span>${escapeHtml(item.label)}</span>
+        </button>
+      `
+    )
+    .join("");
+
+  elements.savedDays.querySelectorAll(".saved-day").forEach((button) => {
+    button.addEventListener("click", () => setDate(parseInputDate(button.dataset.date)));
+  });
+  paintIcons();
+}
+
+function updateSaveButton() {
+  const isSaved = state.saved.some((item) => item.key === keyFromDate(state.date));
+  elements.saveDay.classList.toggle("is-saved", isSaved);
+  elements.saveDay.innerHTML = isSaved
+    ? `<i data-lucide="bookmark-check" aria-hidden="true"></i> Salvata`
+    : `<i data-lucide="bookmark-plus" aria-hidden="true"></i> Salva`;
+  paintIcons();
+}
+
+function renderAccount() {
+  if (state.currentUser) {
+    const firstName = state.currentUser.name.split(" ")[0] || "Profilo";
+    elements.accountButton.title = "Esci";
+    elements.accountButton.innerHTML = `
+      <i data-lucide="log-out" aria-hidden="true"></i>
+      ${escapeHtml(firstName)}
+    `;
+  } else {
+    elements.accountButton.title = "Accedi";
+    elements.accountButton.innerHTML = `
+      <i data-lucide="user-round" aria-hidden="true"></i>
+      Accedi
+    `;
+  }
+  paintIcons();
+}
+
+function openAuth(mode = "login") {
+  setAuthMode(mode);
+  elements.authModal.hidden = false;
+  elements.authMessage.textContent = "";
+  elements.authPassword.value = "";
+  window.setTimeout(() => elements.authEmail.focus(), 0);
+  paintIcons();
+}
+
+function closeAuth() {
+  elements.authModal.hidden = true;
+}
+
+function setAuthMode(mode) {
+  state.authMode = mode;
+  const isRegister = mode === "register";
+  elements.authLoginTab.classList.toggle("is-active", !isRegister);
+  elements.authRegisterTab.classList.toggle("is-active", isRegister);
+  elements.nameField.hidden = !isRegister;
+  elements.authName.required = isRegister;
+  elements.authPassword.autocomplete = isRegister ? "new-password" : "current-password";
+  elements.authSubmit.innerHTML = isRegister
+    ? `<i data-lucide="user-plus" aria-hidden="true"></i> Registrati`
+    : `<i data-lucide="log-in" aria-hidden="true"></i> Accedi`;
+  paintIcons();
+}
+
+async function handleAuthSubmit(event) {
+  event.preventDefault();
+  const email = elements.authEmail.value.trim().toLowerCase();
+  const password = elements.authPassword.value;
+  const name = elements.authName.value.trim();
+
+  if (!email || !password) return;
+
+  if (state.authMode === "register") {
+    if (state.users.some((user) => user.email === email)) {
+      elements.authMessage.textContent = "Email già registrata.";
+      return;
+    }
+
+    const user = {
+      id: makeId("user"),
+      name: name || email.split("@")[0],
+      email,
+      passwordHash: await digestPassword(password),
+      createdAt: new Date().toISOString(),
+    };
+
+    state.users = [...state.users, user];
+    saveUsers();
+    setCurrentUser(user);
+    return;
+  }
+
+  const passwordHash = await digestPassword(password);
+  const user = state.users.find((item) => item.email === email && item.passwordHash === passwordHash);
+  if (!user) {
+    elements.authMessage.textContent = "Email o password non corretti.";
+    return;
+  }
+
+  setCurrentUser(user);
+}
+
+function setCurrentUser(user) {
+  state.currentUser = user;
+  saveCurrentUser(user.id);
+  state.memories = loadMemories();
+  closeAuth();
+  renderAccount();
+  renderMemoryToday();
+  renderPanels();
+}
+
+function signOut() {
+  state.currentUser = null;
+  state.memories = [];
+  saveCurrentUser("");
+  renderAccount();
+  renderMemoryToday();
+  renderPanels();
+}
+
+function setLoadingState(date) {
+  elements.weekdayLabel.textContent = formatWeekday(date);
+  elements.dayTitle.textContent = formatDayTitle(date);
+  elements.daySummary.textContent = "Caricamento della giornata...";
+  elements.sourceState.textContent = "Connessione alla fonte";
+  elements.heroMedia.style.backgroundImage = "";
+  elements.heroMedia.classList.add("is-blank");
+  elements.metrics.innerHTML = "";
+  elements.worldDays.innerHTML = `<p class="empty-copy">Caricamento...</p>`;
+  elements.cardsPanel.innerHTML = `
+    <div class="loading-grid">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+}
+
+function readCache(cacheKey) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey));
+    if (!cached || !cached.savedAt) return null;
+    const age = Date.now() - cached.savedAt;
+    if (age > 1000 * 60 * 60 * 24 * 7) return null;
+    return cached.payload;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(cacheKey, payload) {
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ savedAt: Date.now(), payload }));
+  } catch {
+    /* Local storage can be unavailable in private windows. */
+  }
+}
+
+function loadSavedDays() {
+  try {
+    return JSON.parse(localStorage.getItem("almanacco.savedDays")) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSavedDays() {
+  try {
+    localStorage.setItem("almanacco.savedDays", JSON.stringify(state.saved));
+  } catch {
+    /* Saving is optional; the app still works without local storage. */
+  }
+}
+
+function loadUsers() {
+  try {
+    return JSON.parse(localStorage.getItem("indata.users")) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveUsers() {
+  try {
+    localStorage.setItem("indata.users", JSON.stringify(state.users));
+  } catch {
+    /* Profiles stay in memory for this session if storage is unavailable. */
+  }
+}
+
+function loadCurrentUser() {
+  try {
+    const id = localStorage.getItem("indata.sessionUserId");
+    if (!id) return null;
+    return loadUsers().find((user) => user.id === id) || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCurrentUser(id) {
+  try {
+    if (id) {
+      localStorage.setItem("indata.sessionUserId", id);
+    } else {
+      localStorage.removeItem("indata.sessionUserId");
+    }
+  } catch {
+    /* The visible session still updates even when storage is unavailable. */
+  }
+}
+
+function loadMemories() {
+  if (!state.currentUser) return [];
+  try {
+    return JSON.parse(localStorage.getItem(memoryStorageKey())) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMemories() {
+  if (!state.currentUser) return;
+  try {
+    localStorage.setItem(memoryStorageKey(), JSON.stringify(state.memories));
+  } catch {
+    /* Memories remain in memory for this session if storage is unavailable. */
+  }
+}
+
+function memoryStorageKey() {
+  return `indata.memories.${state.currentUser.id}`;
+}
+
+function makeEmptyDay(month = "00", day = "00") {
+  return {
+    month,
+    day,
+    language: "none",
+    sourceUrl: "https://www.mediawiki.org/wiki/Wikimedia_APIs",
+    selected: [],
+    holidays: [],
+    events: [],
+    births: [],
+    deaths: [],
+    cards: [],
+    heroCard: null,
+  };
+}
+
+function toInputDate(date) {
+  const year = date.getFullYear();
+  return `${year}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function parseInputDate(value) {
+  if (!value) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function keyFromDate(date) {
+  return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function formatDayTitle(date) {
+  return new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long" }).format(date);
+}
+
+function formatWeekday(date) {
+  return new Intl.DateTimeFormat("it-IT", { weekday: "long" }).format(date);
+}
+
+function formatShortWeekday(date) {
+  return new Intl.DateTimeFormat("it-IT", { weekday: "short" }).format(date).replace(".", "");
+}
+
+function formatShortMonth(date) {
+  return new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date).replace(".", "");
+}
+
+async function digestPassword(password) {
+  if (window.crypto?.subtle && window.TextEncoder) {
+    const bytes = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(password));
+    return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  let hash = 0;
+  for (const char of password) {
+    hash = ((hash << 5) - hash + char.charCodeAt(0)) >>> 0;
+  }
+  return `fallback-${hash.toString(36)}`;
+}
+
+function makeId(prefix) {
+  if (window.crypto?.randomUUID) return `${prefix}-${window.crypto.randomUUID()}`;
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function getSourceLabel(language) {
+  if (language === "it") return "Fonte aggiornata in italiano";
+  if (language === "it+en") return "Fonte aggiornata in italiano e inglese";
+  if (language === "en") return "Fonte aggiornata in inglese";
+  return "Fonte aggiornata";
+}
+
+function cleanText(text) {
+  const wrapper = document.createElement("textarea");
+  wrapper.innerHTML = String(text || "");
+  return wrapper.value.replace(/\s+/g, " ").trim();
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, "&#096;");
+}
+
+function paintIcons() {
+  if (window.lucide) {
+    window.lucide.createIcons({
+      attrs: {
+        "stroke-width": 1.8,
+      },
+    });
+  }
+}
+
+init();
+
+    </script>
   </body>
 </html>
