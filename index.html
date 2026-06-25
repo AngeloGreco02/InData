@@ -105,6 +105,16 @@ a {
   border-radius: var(--radius);
 }
 
+.brand-mark svg {
+  width: 31px;
+  height: 31px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.8;
+}
+
 .brand strong,
 .brand small {
   display: block;
@@ -1045,7 +1055,16 @@ svg {
     <div class="app-shell">
       <header class="topbar" aria-label="Barra principale">
         <a class="brand" href="./index.html" aria-label="InData">
-          <span class="brand-mark" aria-hidden="true">ID</span>
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img" aria-label="InData">
+              <rect x="6" y="7" width="36" height="34" rx="8"></rect>
+              <path d="M15 18h18"></path>
+              <path d="M16 27h7"></path>
+              <path d="M16 33h10"></path>
+              <circle cx="33" cy="30" r="5"></circle>
+              <path d="M33 26v4l3 2"></path>
+            </svg>
+          </span>
           <span>
             <strong>InData</strong>
             <small>La giornata raccontata in un minuto</small>
@@ -1176,7 +1195,16 @@ svg {
           <i data-lucide="x"></i>
         </button>
         <div class="auth-heading">
-          <span class="brand-mark" aria-hidden="true">ID</span>
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img" aria-label="InData">
+              <rect x="6" y="7" width="36" height="34" rx="8"></rect>
+              <path d="M15 18h18"></path>
+              <path d="M16 27h7"></path>
+              <path d="M16 33h10"></path>
+              <circle cx="33" cy="30" r="5"></circle>
+              <path d="M33 26v4l3 2"></path>
+            </svg>
+          </span>
           <div>
             <h2 id="authTitle">InData</h2>
             <p>La giornata raccontata in un minuto</p>
