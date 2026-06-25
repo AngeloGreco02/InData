@@ -57,6 +57,11 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 a {
   color: inherit;
 }
@@ -1194,7 +1199,7 @@ svg {
           </label>
           <label class="form-field">
             <span>Password</span>
-            <input id="authPassword" type="password" autocomplete="current-password" required minlength="4" />
+            <input id="authPassword" type="password" autocomplete="current-password" required minlength="6" />
           </label>
           <p class="form-message" id="authMessage" role="status"></p>
           <button class="text-button primary-action" id="authSubmit" type="submit">
@@ -1230,6 +1235,17 @@ const API_HOSTS = [
   (lang, month, day) => `https://api.wikimedia.org/feed/v1/wikipedia/${lang}/onthisday/all/${month}/${day}`,
   (lang, month, day) => `https://${lang}.wikipedia.org/api/rest_v1/feed/onthisday/all/${month}/${day}`,
 ];
+
+const FIREBASE_SDK_VERSION = "12.15.0";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBMoVFOkhLpjMgJPvQdqZfHXG4Vi7C2woY",
+  authDomain: "indata-36250.firebaseapp.com",
+  projectId: "indata-36250",
+  storageBucket: "indata-36250.firebasestorage.app",
+  messagingSenderId: "307560527420",
+  appId: "1:307560527420:web:3123ef2d5ad4440b8d3539",
+  measurementId: "G-BRG52SMZK8",
+};
 
 const CATEGORY_META = {
   holidays: {
@@ -1400,15 +1416,26 @@ const state = {
   activeTab: "overview",
   search: "",
   saved: loadSavedDays(),
-  users: loadUsers(),
-  currentUser: loadCurrentUser(),
+  users: isFirebaseConfigured() ? [] : loadUsers(),
+  currentUser: isFirebaseConfigured() ? null : loadCurrentUser(),
   memories: [],
   authMode: "login",
+  firebase: {
+    enabled: false,
+    ready: false,
+    status: "local",
+    auth: null,
+    db: null,
+    api: null,
+  },
   requestId: 0,
 };
 
-function init() {
-  state.memories = loadMemories();
+async function init() {
+  await setupFirebase();
+  if (!state.firebase.ready) {
+    state.memories = loadMemories();
+  }
   elements.datePicker.value = toInputDate(state.date);
   bindEvents();
   buildDayRail();
@@ -1912,7 +1939,7 @@ function bindMemoryForm() {
   const form = document.querySelector("#memoryForm");
   if (!form) return;
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const dateValue = document.querySelector("#memoryDate")?.value;
     const date = parseInputDate(dateValue);
@@ -1931,16 +1958,14 @@ function bindMemoryForm() {
       createdAt: new Date().toISOString(),
     };
 
-    state.memories = [memory, ...state.memories];
-    saveMemories();
+    await createMemory(memory);
     setDate(date);
     setActiveTab("memories");
   });
 
   document.querySelectorAll("[data-memory-id]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.memories = state.memories.filter((memory) => memory.id !== button.dataset.memoryId);
-      saveMemories();
+    button.addEventListener("click", async () => {
+      await deleteMemory(button.dataset.memoryId);
       renderMemoryToday();
       renderMemoryWorkspace();
     });
@@ -1977,6 +2002,49 @@ function getMemoryAgeLabel(memory, date) {
   if (age === 1) return "Un anno fa";
   if (age === 0) return "Salvato per questo giorno";
   return "In programma";
+}
+
+async function createMemory(memory) {
+  if (state.firebase.ready && state.currentUser) {
+    const collectionRef = getFirebaseMemoriesCollection();
+    const { id, ...payload } = memory;
+    const docRef = await state.firebase.api.addDoc(collectionRef, {
+      ...payload,
+      ownerId: state.currentUser.id,
+      updatedAt: new Date().toISOString(),
+    });
+    state.memories = [{ ...payload, id: docRef.id }, ...state.memories];
+    return;
+  }
+
+  state.memories = [memory, ...state.memories];
+  saveMemories();
+}
+
+async function deleteMemory(memoryId) {
+  if (state.firebase.ready && state.currentUser) {
+    await state.firebase.api.deleteDoc(
+      state.firebase.api.doc(state.firebase.db, "users", state.currentUser.id, "memories", memoryId)
+    );
+  }
+
+  state.memories = state.memories.filter((memory) => memory.id !== memoryId);
+  if (!state.firebase.ready) saveMemories();
+}
+
+async function loadFirebaseMemories() {
+  if (!state.firebase.ready || !state.currentUser) return [];
+  const collectionRef = getFirebaseMemoriesCollection();
+  const memoryQuery = state.firebase.api.query(collectionRef, state.firebase.api.orderBy("date", "desc"));
+  const snapshot = await state.firebase.api.getDocs(memoryQuery);
+  return snapshot.docs.map((document) => ({
+    id: document.id,
+    ...document.data(),
+  }));
+}
+
+function getFirebaseMemoriesCollection() {
+  return state.firebase.api.collection(state.firebase.db, "users", state.currentUser.id, "memories");
 }
 
 function setActiveTab(tabName) {
@@ -2138,6 +2206,88 @@ function updateSaveButton() {
   paintIcons();
 }
 
+async function setupFirebase() {
+  if (!isFirebaseConfigured()) return;
+
+  state.firebase.enabled = true;
+  state.firebase.status = "loading";
+
+  try {
+    const [appModule, authModule, firestoreModule] = await Promise.all([
+      import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-app.js`),
+      import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-auth.js`),
+      import(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-firestore.js`),
+    ]);
+
+    const app = appModule.getApps().length ? appModule.getApps()[0] : appModule.initializeApp(FIREBASE_CONFIG);
+    state.firebase.auth = authModule.getAuth(app);
+    state.firebase.db = firestoreModule.getFirestore(app);
+    state.firebase.api = {
+      createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
+      signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+      signOut: authModule.signOut,
+      updateProfile: authModule.updateProfile,
+      onAuthStateChanged: authModule.onAuthStateChanged,
+      addDoc: firestoreModule.addDoc,
+      collection: firestoreModule.collection,
+      deleteDoc: firestoreModule.deleteDoc,
+      doc: firestoreModule.doc,
+      getDocs: firestoreModule.getDocs,
+      orderBy: firestoreModule.orderBy,
+      query: firestoreModule.query,
+      setDoc: firestoreModule.setDoc,
+    };
+    state.firebase.ready = true;
+    state.firebase.status = "cloud";
+
+    state.firebase.api.onAuthStateChanged(state.firebase.auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        await applyFirebaseUser(firebaseUser);
+        return;
+      }
+
+      state.currentUser = null;
+      state.memories = [];
+      renderAccount();
+      renderMemoryToday();
+      renderPanels();
+    });
+  } catch (error) {
+    state.firebase.ready = false;
+    state.firebase.status = "local";
+    state.users = loadUsers();
+    state.currentUser = loadCurrentUser();
+  }
+}
+
+async function applyFirebaseUser(firebaseUser, fallbackName = "") {
+  state.currentUser = {
+    id: firebaseUser.uid,
+    name: firebaseUser.displayName || fallbackName || firebaseUser.email?.split("@")[0] || "Profilo",
+    email: firebaseUser.email || "",
+    provider: "firebase",
+  };
+  state.memories = await loadFirebaseMemories();
+  closeAuth();
+  renderAccount();
+  renderMemoryToday();
+  renderPanels();
+}
+
+async function saveFirebaseUserProfile(firebaseUser, fallbackName = "") {
+  if (!state.firebase.ready) return;
+  const name = firebaseUser.displayName || fallbackName || firebaseUser.email?.split("@")[0] || "Profilo";
+  await state.firebase.api.setDoc(
+    state.firebase.api.doc(state.firebase.db, "users", firebaseUser.uid),
+    {
+      name,
+      email: firebaseUser.email || "",
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+}
+
 function renderAccount() {
   if (state.currentUser) {
     const firstName = state.currentUser.name.split(" ")[0] || "Profilo";
@@ -2190,35 +2340,60 @@ async function handleAuthSubmit(event) {
   const name = elements.authName.value.trim();
 
   if (!email || !password) return;
+  elements.authSubmit.disabled = true;
+  elements.authMessage.textContent = "";
 
-  if (state.authMode === "register") {
-    if (state.users.some((user) => user.email === email)) {
-      elements.authMessage.textContent = "Email già registrata.";
+  try {
+    if (state.firebase.ready) {
+      if (state.authMode === "register") {
+        const credential = await state.firebase.api.createUserWithEmailAndPassword(state.firebase.auth, email, password);
+        if (name) {
+          await state.firebase.api.updateProfile(credential.user, { displayName: name });
+        }
+        await saveFirebaseUserProfile(credential.user, name);
+        await applyFirebaseUser(credential.user, name);
+        closeAuth();
+        return;
+      }
+
+      await state.firebase.api.signInWithEmailAndPassword(state.firebase.auth, email, password);
+      closeAuth();
       return;
     }
 
-    const user = {
-      id: makeId("user"),
-      name: name || email.split("@")[0],
-      email,
-      passwordHash: await digestPassword(password),
-      createdAt: new Date().toISOString(),
-    };
+    if (state.authMode === "register") {
+      if (state.users.some((user) => user.email === email)) {
+        elements.authMessage.textContent = "Email già registrata.";
+        return;
+      }
 
-    state.users = [...state.users, user];
-    saveUsers();
+      const user = {
+        id: makeId("user"),
+        name: name || email.split("@")[0],
+        email,
+        passwordHash: await digestPassword(password),
+        createdAt: new Date().toISOString(),
+      };
+
+      state.users = [...state.users, user];
+      saveUsers();
+      setCurrentUser(user);
+      return;
+    }
+
+    const passwordHash = await digestPassword(password);
+    const user = state.users.find((item) => item.email === email && item.passwordHash === passwordHash);
+    if (!user) {
+      elements.authMessage.textContent = "Email o password non corretti.";
+      return;
+    }
+
     setCurrentUser(user);
-    return;
+  } catch (error) {
+    elements.authMessage.textContent = getFirebaseErrorMessage(error);
+  } finally {
+    elements.authSubmit.disabled = false;
   }
-
-  const passwordHash = await digestPassword(password);
-  const user = state.users.find((item) => item.email === email && item.passwordHash === passwordHash);
-  if (!user) {
-    elements.authMessage.textContent = "Email o password non corretti.";
-    return;
-  }
-
-  setCurrentUser(user);
 }
 
 function setCurrentUser(user) {
@@ -2231,7 +2406,12 @@ function setCurrentUser(user) {
   renderPanels();
 }
 
-function signOut() {
+async function signOut() {
+  if (state.firebase.ready) {
+    await state.firebase.api.signOut(state.firebase.auth);
+    return;
+  }
+
   state.currentUser = null;
   state.memories = [];
   saveCurrentUser("");
@@ -2401,6 +2581,26 @@ function formatShortWeekday(date) {
 
 function formatShortMonth(date) {
   return new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date).replace(".", "");
+}
+
+function isFirebaseConfigured() {
+  return ["apiKey", "authDomain", "projectId", "appId"].every((key) => {
+    const value = FIREBASE_CONFIG[key];
+    return value && !String(value).includes("INSERISCI");
+  });
+}
+
+function getFirebaseErrorMessage(error) {
+  const code = error?.code || "";
+  const messages = {
+    "auth/email-already-in-use": "Email già registrata.",
+    "auth/invalid-email": "Email non valida.",
+    "auth/invalid-credential": "Email o password non corretti.",
+    "auth/weak-password": "Usa una password di almeno 6 caratteri.",
+    "auth/network-request-failed": "Connessione non disponibile. Riprova tra poco.",
+    "permission-denied": "Permessi Firestore non configurati.",
+  };
+  return messages[code] || "Operazione non riuscita. Controlla Firebase e riprova.";
 }
 
 async function digestPassword(password) {
