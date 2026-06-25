@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InData</title>
+    <link rel="preconnect" href="https://api.wikimedia.org" />
+    <link rel="preconnect" href="https://it.wikipedia.org" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar" aria-label="Barra principale">
+        <a class="brand" href="./index.html" aria-label="InData">
+          <span class="brand-mark" aria-hidden="true">ID</span>
+          <span>
+            <strong>InData</strong>
+            <small>La giornata raccontata in un minuto</small>
+          </span>
+        </a>
+
+        <div class="date-tools">
+          <button class="icon-button" id="previousDay" type="button" title="Giorno precedente" aria-label="Giorno precedente">
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <label class="date-field" for="datePicker">
+            <i data-lucide="calendar-days" aria-hidden="true"></i>
+            <input id="datePicker" type="date" />
+          </label>
+          <button class="icon-button" id="nextDay" type="button" title="Giorno successivo" aria-label="Giorno successivo">
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="text-button" id="todayButton" type="button">
+            <i data-lucide="sparkles" aria-hidden="true"></i>
+            Oggi
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="day-hero" aria-labelledby="dayTitle">
+          <div class="hero-media" id="heroMedia" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <p class="eyebrow" id="weekdayLabel">Oggi</p>
+            <h1 id="dayTitle">Almanacco del giorno</h1>
+            <p id="daySummary">Caricamento della giornata...</p>
+          </div>
+          <aside class="source-panel" aria-label="Stato dei dati">
+            <span id="sourceState">Connessione alla fonte</span>
+            <a id="sourceLink" href="https://www.mediawiki.org/wiki/Wikimedia_APIs" target="_blank" rel="noreferrer">Wikimedia</a>
+          </aside>
+        </section>
+
+        <section class="quick-days" aria-label="Prossimi giorni">
+          <div id="dayRail" class="day-rail"></div>
+        </section>
+
+        <section class="dashboard" aria-label="Almanacco">
+          <nav class="category-tabs" aria-label="Categorie">
+            <button class="tab is-active" type="button" data-tab="overview">
+              <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+              Sintesi
+            </button>
+            <button class="tab" type="button" data-tab="holidays">
+              <i data-lucide="globe-2" aria-hidden="true"></i>
+              Giornate
+            </button>
+            <button class="tab" type="button" data-tab="events">
+              <i data-lucide="landmark" aria-hidden="true"></i>
+              Storia
+            </button>
+            <button class="tab" type="button" data-tab="births">
+              <i data-lucide="cake" aria-hidden="true"></i>
+              Nati
+            </button>
+            <button class="tab" type="button" data-tab="deaths">
+              <i data-lucide="flower-2" aria-hidden="true"></i>
+              Morti
+            </button>
+          </nav>
+
+          <div class="controls-row">
+            <label class="search-field" for="searchInput">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <input id="searchInput" type="search" placeholder="Cerca nella giornata" autocomplete="off" />
+            </label>
+            <button class="text-button subtle" id="saveDay" type="button">
+              <i data-lucide="bookmark-plus" aria-hidden="true"></i>
+              Salva
+            </button>
+          </div>
+
+          <section class="overview-grid" id="overviewPanel">
+            <article class="insight-block world-block">
+              <div class="block-heading">
+                <i data-lucide="globe-2" aria-hidden="true"></i>
+                <h2>Giornata mondiale</h2>
+              </div>
+              <div id="worldDays" class="world-days"></div>
+            </article>
+
+            <article class="insight-block">
+              <div class="block-heading">
+                <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+                <h2>Quadro rapido</h2>
+              </div>
+              <div class="metric-grid" id="metrics"></div>
+            </article>
+
+            <article class="insight-block saved-block">
+              <div class="block-heading">
+                <i data-lucide="book-open-check" aria-hidden="true"></i>
+                <h2>Giornate salvate</h2>
+              </div>
+              <div id="savedDays" class="saved-days"></div>
+            </article>
+          </section>
+
+          <section class="content-panel is-visible" id="cardsPanel" aria-live="polite"></section>
+        </section>
+      </main>
+    </div>
+
+    <template id="cardTemplate">
+      <article class="info-card">
+        <div class="card-image" aria-hidden="true"></div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="year-pill"></span>
+            <span class="category-pill"></span>
+          </div>
+          <h3></h3>
+          <p></p>
+          <a class="card-link" target="_blank" rel="noreferrer">
+            Fonte
+            <i data-lucide="external-link" aria-hidden="true"></i>
+          </a>
+        </div>
+      </article>
+    </template>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
