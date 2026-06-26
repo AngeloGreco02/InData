@@ -197,6 +197,7 @@ a {
 }
 
 .date-field,
+.language-field,
 .search-field {
   display: inline-flex;
   align-items: center;
@@ -212,6 +213,7 @@ a {
 }
 
 .date-field input,
+.language-field select,
 .search-field input {
   width: 100%;
   min-width: 0;
@@ -223,6 +225,15 @@ a {
 
 .date-field input {
   width: 146px;
+}
+
+.language-field {
+  padding: 0 10px;
+}
+
+.language-field select {
+  width: 112px;
+  cursor: pointer;
 }
 
 .modal-layer {
@@ -1016,7 +1027,12 @@ svg {
     width: 100%;
   }
 
-  .date-tools .text-button {
+  .language-field select {
+    width: 100%;
+  }
+
+  .date-tools .text-button,
+  .date-tools .language-field {
     grid-column: 1 / -1;
   }
 
@@ -1098,7 +1114,7 @@ svg {
           </span>
           <span>
             <strong>InData</strong>
-            <small>La giornata raccontata in un minuto</small>
+            <small id="brandTagline">La giornata raccontata in un minuto</small>
           </span>
         </a>
 
@@ -1117,6 +1133,16 @@ svg {
             <i data-lucide="sparkles" aria-hidden="true"></i>
             Oggi
           </button>
+          <label class="language-field" for="languageSelect">
+            <i data-lucide="languages" aria-hidden="true"></i>
+            <select id="languageSelect" aria-label="Lingua">
+              <option value="it">Italiano</option>
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="es">Español</option>
+            </select>
+          </label>
           <button class="text-button account-button" id="accountButton" type="button">
             <i data-lucide="user-round" aria-hidden="true"></i>
             Accedi
@@ -1194,7 +1220,7 @@ svg {
               <div id="worldDays" class="world-days"></div>
             </article>
 
-            <article class="insight-block">
+            <article class="insight-block quick-block">
               <div class="block-heading">
                 <i data-lucide="bar-chart-3" aria-hidden="true"></i>
                 <h2>Quadro rapido</h2>
@@ -1250,7 +1276,7 @@ svg {
           </span>
           <div>
             <h2 id="authTitle">InData</h2>
-            <p>La giornata raccontata in un minuto</p>
+            <p id="authSubtitle">La giornata raccontata in un minuto</p>
           </div>
         </div>
 
@@ -1301,7 +1327,258 @@ svg {
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
-const WIKI_LANGUAGES = ["it", "en"];
+const SUPPORTED_LANGUAGES = ["it", "fr", "en", "de", "es"];
+const LANGUAGE_META = {
+  it: { name: "Italiano", locale: "it-IT", wiki: "it" },
+  fr: { name: "Français", locale: "fr-FR", wiki: "fr" },
+  en: { name: "English", locale: "en-US", wiki: "en" },
+  de: { name: "Deutsch", locale: "de-DE", wiki: "de" },
+  es: { name: "Español", locale: "es-ES", wiki: "es" },
+};
+
+const I18N = {
+  it: {
+    tagline: "La giornata raccontata in un minuto",
+    today: "Oggi",
+    signIn: "Accedi",
+    signOut: "Esci",
+    register: "Registrati",
+    close: "Chiudi",
+    previousDay: "Giorno precedente",
+    nextDay: "Giorno successivo",
+    searchPlaceholder: "Cerca nella giornata",
+    save: "Salva",
+    saved: "Salvata",
+    source: "Fonte",
+    noData: "Nessun dato disponibile per questa data.",
+    loadingDay: "Caricamento della giornata...",
+    loading: "Caricamento...",
+    localFallback: "Dati locali di riserva",
+    cachedData: "Dati in cache",
+    updatedSource: "Fonte aggiornata",
+    updatedSourceLang: "Fonte aggiornata in {language}",
+    updatedSourceMixed: "Fonte aggiornata in {languages}",
+    category: {
+      overview: "Sintesi",
+      holidays: "Giornate",
+      saints: "Santo",
+      events: "Storia",
+      births: "Nati",
+      deaths: "Morti",
+      selected: "In evidenza",
+      memories: "Ricordi",
+    },
+    singular: {
+      holidays: "Ricorrenza",
+      saints: "Santo",
+      events: "Evento",
+      births: "Nascita",
+      deaths: "Scomparsa",
+      selected: "Focus",
+      memories: "Ricordo",
+    },
+    blocks: {
+      worldDay: "Giornata mondiale",
+      quickSummary: "Quadro rapido",
+      saintOfDay: "Santo del giorno",
+      savedDays: "Giornate salvate",
+      personalMemories: "Ricordi personali",
+    },
+    metrics: {
+      holidays: "Ricorrenze",
+      events: "Eventi",
+      births: "Nati",
+      deaths: "Morti",
+    },
+    empty: {
+      holidays: "Nessuna ricorrenza trovata per questa data.",
+      saints: "Nessun santo trovato nella fonte per questa data.",
+      savedDays: "Nessuna giornata salvata.",
+      memories: "Nessun ricordo per questa data.",
+      noResults: "Nessun risultato per questa selezione.",
+      authGate: "Accedi per salvare i tuoi ricordi personali.",
+      archive: "Archivio vuoto.",
+    },
+    memory: {
+      new: "Nuovo ricordo",
+      title: "Titolo",
+      titlePlaceholder: "Es. Primo giorno del progetto",
+      date: "Data",
+      kind: "Etichetta",
+      detail: "Dettaglio",
+      detailPlaceholder: "Una nota breve da ritrovare fra un anno",
+      repeat: "Ricordamelo ogni anno",
+      save: "Salva ricordo",
+      todayList: "Ricordi di questa data",
+      archive: "Archivio personale",
+      delete: "Elimina",
+      onlyDate: "Solo questa data",
+      oneYear: "Un anno fa",
+      manyYears: "{count} anni fa",
+      current: "Salvato per questo giorno",
+      future: "In programma",
+      kinds: {
+        personale: "Personale",
+        famiglia: "Famiglia",
+        lavoro: "Lavoro",
+        viaggio: "Viaggio",
+        traguardo: "Traguardo",
+      },
+    },
+    auth: {
+      name: "Nome",
+      email: "Email",
+      password: "Password",
+      profile: "Profilo",
+      emailExists: "Email già registrata.",
+      invalidEmail: "Email non valida.",
+      invalidCredentials: "Email o password non corretti.",
+      weakPassword: "Usa una password di almeno 6 caratteri.",
+      network: "Connessione non disponibile. Riprova tra poco.",
+      permissionDenied: "Permessi Firestore non configurati.",
+      genericError: "Operazione non riuscita. Controlla Firebase e riprova.",
+    },
+    noYear: "Senza data",
+    almanac: "Almanacco",
+  },
+  fr: {
+    tagline: "La journée racontée en une minute",
+    today: "Aujourd’hui",
+    signIn: "Connexion",
+    signOut: "Déconnexion",
+    register: "Inscription",
+    close: "Fermer",
+    previousDay: "Jour précédent",
+    nextDay: "Jour suivant",
+    searchPlaceholder: "Rechercher dans la journée",
+    save: "Enregistrer",
+    saved: "Enregistrée",
+    source: "Source",
+    noData: "Aucune donnée disponible pour cette date.",
+    loadingDay: "Chargement de la journée...",
+    loading: "Chargement...",
+    localFallback: "Données locales de secours",
+    cachedData: "Données en cache",
+    updatedSource: "Source mise à jour",
+    updatedSourceLang: "Source mise à jour en {language}",
+    updatedSourceMixed: "Source mise à jour en {languages}",
+    category: { overview: "Synthèse", holidays: "Journées", saints: "Saint", events: "Histoire", births: "Naissances", deaths: "Décès", selected: "À la une", memories: "Souvenirs" },
+    singular: { holidays: "Commémoration", saints: "Saint", events: "Événement", births: "Naissance", deaths: "Décès", selected: "Focus", memories: "Souvenir" },
+    blocks: { worldDay: "Journée mondiale", quickSummary: "Résumé rapide", saintOfDay: "Saint du jour", savedDays: "Jours enregistrés", personalMemories: "Souvenirs personnels" },
+    metrics: { holidays: "Commémorations", events: "Événements", births: "Naissances", deaths: "Décès" },
+    empty: { holidays: "Aucune commémoration trouvée pour cette date.", saints: "Aucun saint trouvé dans la source pour cette date.", savedDays: "Aucun jour enregistré.", memories: "Aucun souvenir pour cette date.", noResults: "Aucun résultat pour cette sélection.", authGate: "Connectez-vous pour enregistrer vos souvenirs personnels.", archive: "Archive vide." },
+    memory: {
+      new: "Nouveau souvenir", title: "Titre", titlePlaceholder: "Ex. Premier jour du projet", date: "Date", kind: "Étiquette", detail: "Détail", detailPlaceholder: "Une courte note à retrouver dans un an", repeat: "Me le rappeler chaque année", save: "Enregistrer le souvenir", todayList: "Souvenirs de cette date", archive: "Archive personnelle", delete: "Supprimer", onlyDate: "Seulement cette date", oneYear: "Il y a un an", manyYears: "Il y a {count} ans", current: "Enregistré pour ce jour", future: "Prévu",
+      kinds: { personale: "Personnel", famiglia: "Famille", lavoro: "Travail", viaggio: "Voyage", traguardo: "Étape importante" },
+    },
+    auth: { name: "Nom", email: "Email", password: "Mot de passe", profile: "Profil", emailExists: "Email déjà enregistrée.", invalidEmail: "Email non valide.", invalidCredentials: "Email ou mot de passe incorrect.", weakPassword: "Utilisez un mot de passe d’au moins 6 caractères.", network: "Connexion indisponible. Réessayez plus tard.", permissionDenied: "Autorisations Firestore non configurées.", genericError: "Opération échouée. Vérifiez Firebase et réessayez." },
+    noYear: "Sans date",
+    almanac: "Almanach",
+  },
+  en: {
+    tagline: "The day explained in one minute",
+    today: "Today",
+    signIn: "Sign in",
+    signOut: "Sign out",
+    register: "Register",
+    close: "Close",
+    previousDay: "Previous day",
+    nextDay: "Next day",
+    searchPlaceholder: "Search this day",
+    save: "Save",
+    saved: "Saved",
+    source: "Source",
+    noData: "No data available for this date.",
+    loadingDay: "Loading the day...",
+    loading: "Loading...",
+    localFallback: "Local fallback data",
+    cachedData: "Cached data",
+    updatedSource: "Updated source",
+    updatedSourceLang: "Source updated in {language}",
+    updatedSourceMixed: "Source updated in {languages}",
+    category: { overview: "Overview", holidays: "Days", saints: "Saint", events: "History", births: "Births", deaths: "Deaths", selected: "Featured", memories: "Memories" },
+    singular: { holidays: "Observance", saints: "Saint", events: "Event", births: "Birth", deaths: "Death", selected: "Focus", memories: "Memory" },
+    blocks: { worldDay: "World day", quickSummary: "Quick summary", saintOfDay: "Saint of the day", savedDays: "Saved days", personalMemories: "Personal memories" },
+    metrics: { holidays: "Observances", events: "Events", births: "Births", deaths: "Deaths" },
+    empty: { holidays: "No observance found for this date.", saints: "No saint found in the source for this date.", savedDays: "No saved days.", memories: "No memories for this date.", noResults: "No results for this selection.", authGate: "Sign in to save your personal memories.", archive: "Archive is empty." },
+    memory: {
+      new: "New memory", title: "Title", titlePlaceholder: "Example: First day of the project", date: "Date", kind: "Label", detail: "Details", detailPlaceholder: "A short note to find again next year", repeat: "Remind me every year", save: "Save memory", todayList: "Memories for this date", archive: "Personal archive", delete: "Delete", onlyDate: "Only this date", oneYear: "One year ago", manyYears: "{count} years ago", current: "Saved for this day", future: "Scheduled",
+      kinds: { personale: "Personal", famiglia: "Family", lavoro: "Work", viaggio: "Travel", traguardo: "Milestone" },
+    },
+    auth: { name: "Name", email: "Email", password: "Password", profile: "Profile", emailExists: "Email already registered.", invalidEmail: "Invalid email.", invalidCredentials: "Email or password is incorrect.", weakPassword: "Use a password of at least 6 characters.", network: "Connection unavailable. Try again shortly.", permissionDenied: "Firestore permissions are not configured.", genericError: "Operation failed. Check Firebase and try again." },
+    noYear: "No year",
+    almanac: "Almanac",
+  },
+  de: {
+    tagline: "Der Tag in einer Minute erklärt",
+    today: "Heute",
+    signIn: "Anmelden",
+    signOut: "Abmelden",
+    register: "Registrieren",
+    close: "Schließen",
+    previousDay: "Vorheriger Tag",
+    nextDay: "Nächster Tag",
+    searchPlaceholder: "Diesen Tag durchsuchen",
+    save: "Speichern",
+    saved: "Gespeichert",
+    source: "Quelle",
+    noData: "Für dieses Datum sind keine Daten verfügbar.",
+    loadingDay: "Tag wird geladen...",
+    loading: "Laden...",
+    localFallback: "Lokale Ersatzdaten",
+    cachedData: "Daten aus dem Cache",
+    updatedSource: "Quelle aktualisiert",
+    updatedSourceLang: "Quelle auf {language} aktualisiert",
+    updatedSourceMixed: "Quelle in {languages} aktualisiert",
+    category: { overview: "Übersicht", holidays: "Gedenktage", saints: "Heilige", events: "Geschichte", births: "Geboren", deaths: "Gestorben", selected: "Ausgewählt", memories: "Erinnerungen" },
+    singular: { holidays: "Gedenktag", saints: "Heilige/r", events: "Ereignis", births: "Geburt", deaths: "Tod", selected: "Fokus", memories: "Erinnerung" },
+    blocks: { worldDay: "Welttag", quickSummary: "Kurzüberblick", saintOfDay: "Heilige/r des Tages", savedDays: "Gespeicherte Tage", personalMemories: "Persönliche Erinnerungen" },
+    metrics: { holidays: "Gedenktage", events: "Ereignisse", births: "Geburten", deaths: "Todesfälle" },
+    empty: { holidays: "Kein Gedenktag für dieses Datum gefunden.", saints: "Keine Heiligenangabe in der Quelle für dieses Datum gefunden.", savedDays: "Keine gespeicherten Tage.", memories: "Keine Erinnerungen für dieses Datum.", noResults: "Keine Ergebnisse für diese Auswahl.", authGate: "Melde dich an, um persönliche Erinnerungen zu speichern.", archive: "Archiv ist leer." },
+    memory: {
+      new: "Neue Erinnerung", title: "Titel", titlePlaceholder: "Z. B. Erster Projekttag", date: "Datum", kind: "Label", detail: "Details", detailPlaceholder: "Eine kurze Notiz für nächstes Jahr", repeat: "Jedes Jahr erinnern", save: "Erinnerung speichern", todayList: "Erinnerungen für dieses Datum", archive: "Persönliches Archiv", delete: "Löschen", onlyDate: "Nur dieses Datum", oneYear: "Vor einem Jahr", manyYears: "Vor {count} Jahren", current: "Für diesen Tag gespeichert", future: "Geplant",
+      kinds: { personale: "Persönlich", famiglia: "Familie", lavoro: "Arbeit", viaggio: "Reise", traguardo: "Meilenstein" },
+    },
+    auth: { name: "Name", email: "E-Mail", password: "Passwort", profile: "Profil", emailExists: "E-Mail ist bereits registriert.", invalidEmail: "Ungültige E-Mail.", invalidCredentials: "E-Mail oder Passwort ist falsch.", weakPassword: "Verwende ein Passwort mit mindestens 6 Zeichen.", network: "Verbindung nicht verfügbar. Versuche es gleich erneut.", permissionDenied: "Firestore-Berechtigungen sind nicht konfiguriert.", genericError: "Vorgang fehlgeschlagen. Prüfe Firebase und versuche es erneut." },
+    noYear: "Ohne Datum",
+    almanac: "Almanach",
+  },
+  es: {
+    tagline: "El día contado en un minuto",
+    today: "Hoy",
+    signIn: "Acceder",
+    signOut: "Salir",
+    register: "Registrarse",
+    close: "Cerrar",
+    previousDay: "Día anterior",
+    nextDay: "Día siguiente",
+    searchPlaceholder: "Buscar en el día",
+    save: "Guardar",
+    saved: "Guardado",
+    source: "Fuente",
+    noData: "No hay datos disponibles para esta fecha.",
+    loadingDay: "Cargando el día...",
+    loading: "Cargando...",
+    localFallback: "Datos locales de reserva",
+    cachedData: "Datos en caché",
+    updatedSource: "Fuente actualizada",
+    updatedSourceLang: "Fuente actualizada en {language}",
+    updatedSourceMixed: "Fuente actualizada en {languages}",
+    category: { overview: "Resumen", holidays: "Días", saints: "Santo", events: "Historia", births: "Nacidos", deaths: "Fallecidos", selected: "Destacado", memories: "Recuerdos" },
+    singular: { holidays: "Conmemoración", saints: "Santo", events: "Evento", births: "Nacimiento", deaths: "Fallecimiento", selected: "Foco", memories: "Recuerdo" },
+    blocks: { worldDay: "Día mundial", quickSummary: "Resumen rápido", saintOfDay: "Santo del día", savedDays: "Días guardados", personalMemories: "Recuerdos personales" },
+    metrics: { holidays: "Conmemoraciones", events: "Eventos", births: "Nacimientos", deaths: "Fallecimientos" },
+    empty: { holidays: "No se encontró ninguna conmemoración para esta fecha.", saints: "No se encontró ningún santo en la fuente para esta fecha.", savedDays: "No hay días guardados.", memories: "No hay recuerdos para esta fecha.", noResults: "No hay resultados para esta selección.", authGate: "Accede para guardar tus recuerdos personales.", archive: "Archivo vacío." },
+    memory: {
+      new: "Nuevo recuerdo", title: "Título", titlePlaceholder: "Ej. Primer día del proyecto", date: "Fecha", kind: "Etiqueta", detail: "Detalle", detailPlaceholder: "Una nota breve para encontrar dentro de un año", repeat: "Recordármelo cada año", save: "Guardar recuerdo", todayList: "Recuerdos de esta fecha", archive: "Archivo personal", delete: "Eliminar", onlyDate: "Solo esta fecha", oneYear: "Hace un año", manyYears: "Hace {count} años", current: "Guardado para este día", future: "Programado",
+      kinds: { personale: "Personal", famiglia: "Familia", lavoro: "Trabajo", viaggio: "Viaje", traguardo: "Meta" },
+    },
+    auth: { name: "Nombre", email: "Email", password: "Contraseña", profile: "Perfil", emailExists: "Email ya registrado.", invalidEmail: "Email no válido.", invalidCredentials: "Email o contraseña incorrectos.", weakPassword: "Usa una contraseña de al menos 6 caracteres.", network: "Conexión no disponible. Inténtalo de nuevo pronto.", permissionDenied: "Permisos de Firestore no configurados.", genericError: "La operación falló. Revisa Firebase e inténtalo de nuevo." },
+    noYear: "Sin fecha",
+    almanac: "Almanaque",
+  },
+};
+
 const API_HOSTS = [
   (lang, month, day) => `https://api.wikimedia.org/feed/v1/wikipedia/${lang}/onthisday/all/${month}/${day}`,
   (lang, month, day) => `https://${lang}.wikipedia.org/api/rest_v1/feed/onthisday/all/${month}/${day}`,
@@ -1374,6 +1651,15 @@ const WORLD_DAY_TERMS = [
   "united nations",
   "nazioni unite",
   "onu",
+  "journée mondiale",
+  "journée internationale",
+  "nations unies",
+  "welttag",
+  "internationaler tag",
+  "vereinte nationen",
+  "día mundial",
+  "día internacional",
+  "naciones unidas",
 ];
 
 const SAINT_TERMS = [
@@ -1390,6 +1676,12 @@ const SAINT_TERMS = [
   "vescovo",
   "apostolo",
   "liturg",
+  "sainte ",
+  "heilige",
+  "heiliger",
+  "apóstol",
+  "mártir",
+  "obispo",
 ];
 
 const FALLBACK_DATA = {
@@ -1472,7 +1764,9 @@ const elements = {
   previousDay: document.querySelector("#previousDay"),
   nextDay: document.querySelector("#nextDay"),
   todayButton: document.querySelector("#todayButton"),
+  languageSelect: document.querySelector("#languageSelect"),
   accountButton: document.querySelector("#accountButton"),
+  brandTagline: document.querySelector("#brandTagline"),
   dayTitle: document.querySelector("#dayTitle"),
   daySummary: document.querySelector("#daySummary"),
   weekdayLabel: document.querySelector("#weekdayLabel"),
@@ -1502,12 +1796,14 @@ const elements = {
   authMessage: document.querySelector("#authMessage"),
   authSubmit: document.querySelector("#authSubmit"),
   nameField: document.querySelector("#nameField"),
+  authSubtitle: document.querySelector("#authSubtitle"),
 };
 
 const state = {
   date: new Date(),
   data: null,
   activeTab: "overview",
+  language: loadLanguage(),
   search: "",
   saved: loadSavedDays(),
   users: isFirebaseConfigured() ? [] : loadUsers(),
@@ -1530,8 +1826,11 @@ async function init() {
   if (!state.firebase.ready) {
     state.memories = loadMemories();
   }
+  document.documentElement.lang = state.language;
+  elements.languageSelect.value = state.language;
   elements.datePicker.value = toInputDate(state.date);
   bindEvents();
+  renderStaticText();
   buildDayRail();
   renderAccount();
   renderSavedDays();
@@ -1544,6 +1843,9 @@ function bindEvents() {
   elements.previousDay.addEventListener("click", () => shiftDate(-1));
   elements.nextDay.addEventListener("click", () => shiftDate(1));
   elements.todayButton.addEventListener("click", () => setDate(new Date()));
+  elements.languageSelect.addEventListener("change", (event) => {
+    setLanguage(event.target.value);
+  });
   elements.accountButton.addEventListener("click", () => {
     if (state.currentUser) {
       signOut();
@@ -1604,11 +1906,100 @@ function setDate(nextDate) {
   loadDay(state.date);
 }
 
+function setLanguage(language) {
+  if (!SUPPORTED_LANGUAGES.includes(language)) return;
+  state.language = language;
+  document.documentElement.lang = language;
+  try {
+    localStorage.setItem("indata.language", language);
+  } catch {
+    /* Language preference is optional when storage is unavailable. */
+  }
+  elements.languageSelect.value = language;
+  renderStaticText();
+  buildDayRail();
+  renderAll();
+  loadDay(state.date);
+}
+
+function renderStaticText() {
+  elements.brandTagline.textContent = t("tagline");
+  elements.authSubtitle.textContent = t("tagline");
+  elements.todayButton.innerHTML = `<i data-lucide="sparkles" aria-hidden="true"></i> ${t("today")}`;
+  elements.previousDay.title = t("previousDay");
+  elements.previousDay.setAttribute("aria-label", t("previousDay"));
+  elements.nextDay.title = t("nextDay");
+  elements.nextDay.setAttribute("aria-label", t("nextDay"));
+  elements.languageSelect.setAttribute("aria-label", languageName(state.language));
+  elements.searchInput.placeholder = t("searchPlaceholder");
+  elements.authClose.title = t("close");
+  elements.authClose.setAttribute("aria-label", t("close"));
+
+  setTabLabel("overview", "layout-dashboard", t("category.overview"));
+  setTabLabel("holidays", "globe-2", t("category.holidays"));
+  setTabLabel("saints", "church", t("category.saints"));
+  setTabLabel("events", "landmark", t("category.events"));
+  setTabLabel("births", "cake", t("category.births"));
+  setTabLabel("deaths", "flower-2", t("category.deaths"));
+  setTabLabel("memories", "heart", t("category.memories"));
+
+  document.querySelector(".world-block h2").textContent = t("blocks.worldDay");
+  document.querySelector(".quick-block h2").textContent = t("blocks.quickSummary");
+  document.querySelector(".saint-block h2").textContent = t("blocks.saintOfDay");
+  document.querySelector(".saved-block h2").textContent = t("blocks.savedDays");
+  document.querySelector(".memory-block h2").textContent = t("blocks.personalMemories");
+
+  elements.authLoginTab.textContent = t("signIn");
+  elements.authRegisterTab.textContent = t("register");
+  elements.nameField.querySelector("span").textContent = t("auth.name");
+  elements.authEmail.closest(".form-field").querySelector("span").textContent = t("auth.email");
+  elements.authPassword.closest(".form-field").querySelector("span").textContent = t("auth.password");
+  setAuthMode(state.authMode);
+  updateSaveButton();
+  renderAccount();
+  paintIcons();
+}
+
+function setTabLabel(tabName, icon, label) {
+  const tab = elements.tabs.find((item) => item.dataset.tab === tabName);
+  if (!tab) return;
+  tab.innerHTML = `<i data-lucide="${icon}" aria-hidden="true"></i> ${label}`;
+}
+
+function t(path, replacements = {}) {
+  const dictionary = I18N[state.language] || I18N.it;
+  const fallback = I18N.en;
+  const value = path.split(".").reduce((current, key) => current?.[key], dictionary) ??
+    path.split(".").reduce((current, key) => current?.[key], fallback) ??
+    path;
+  return String(value).replace(/\{(\w+)\}/g, (_, key) => replacements[key] ?? "");
+}
+
+function languageName(language) {
+  return LANGUAGE_META[language]?.name || language;
+}
+
+function currentLocale() {
+  return LANGUAGE_META[state.language]?.locale || "it-IT";
+}
+
+function getWikiLanguages() {
+  return [...new Set([LANGUAGE_META[state.language]?.wiki || "it", "en", "it"])];
+}
+
+function categoryLabel(category) {
+  return t(`category.${category}`);
+}
+
+function categorySingular(category) {
+  return t(`singular.${category}`);
+}
+
 async function loadDay(date) {
   const requestId = ++state.requestId;
   const month = pad(date.getMonth() + 1);
   const day = pad(date.getDate());
-  const cacheKey = `almanacco.${month}-${day}`;
+  const cacheKey = `almanacco.${state.language}.${month}-${day}`;
 
   setLoadingState(date);
 
@@ -1639,7 +2030,7 @@ async function fetchOnThisDay(month, day) {
   const payloads = [];
   let lastError;
 
-  for (const language of WIKI_LANGUAGES) {
+  for (const language of getWikiLanguages()) {
     try {
       payloads.push(await fetchLanguagePayload(language, month, day));
     } catch (error) {
@@ -1754,7 +2145,7 @@ function dedupeItems(items, category) {
 
 function toCard(item, category) {
   const page = Array.isArray(item.pages) ? item.pages.find(Boolean) : null;
-  const title = page?.normalizedtitle || page?.title || item.text.split(",")[0] || CATEGORY_META[category].singular;
+  const title = page?.normalizedtitle || page?.title || item.text.split(",")[0] || categorySingular(category);
   const description = cleanText(page?.description || page?.extract || item.text);
   const image = page?.thumbnail?.source || page?.originalimage?.source || "";
   const url = page?.content_urls?.desktop?.page || page?.content_urls?.mobile?.page || "";
@@ -1811,7 +2202,7 @@ function renderHero(flags) {
   elements.dayTitle.textContent = title;
 
   if (hero) {
-    const category = CATEGORY_META[hero.category]?.singular || "Almanacco";
+    const category = categorySingular(hero.category) || t("almanac");
     const year = hero.year ? `${hero.year}: ` : "";
     elements.daySummary.textContent = `${category} - ${year}${hero.text}`;
     if (hero.image) {
@@ -1824,16 +2215,16 @@ function renderHero(flags) {
       elements.heroMedia.classList.remove("is-person");
     }
   } else {
-    elements.daySummary.textContent = "Nessun dato disponibile per questa data.";
+    elements.daySummary.textContent = t("noData");
     elements.heroMedia.style.backgroundImage = "";
     elements.heroMedia.classList.add("is-blank");
     elements.heroMedia.classList.remove("is-person");
   }
 
   if (flags.fallback) {
-    elements.sourceState.textContent = "Dati locali di riserva";
+    elements.sourceState.textContent = t("localFallback");
   } else if (flags.stale) {
-    elements.sourceState.textContent = "Dati in cache";
+    elements.sourceState.textContent = t("cachedData");
   } else {
     elements.sourceState.textContent = getSourceLabel(state.data?.language);
   }
@@ -1844,10 +2235,10 @@ function renderHero(flags) {
 function renderMetrics() {
   const data = state.data || makeEmptyDay();
   const metrics = [
-    { label: "Ricorrenze", value: data.holidays.length, icon: "globe-2" },
-    { label: "Eventi", value: data.events.length, icon: "landmark" },
-    { label: "Nati", value: data.births.length, icon: "cake" },
-    { label: "Morti", value: data.deaths.length, icon: "flower-2" },
+    { label: t("metrics.holidays"), value: data.holidays.length, icon: "globe-2" },
+    { label: t("metrics.events"), value: data.events.length, icon: "landmark" },
+    { label: t("metrics.births"), value: data.births.length, icon: "cake" },
+    { label: t("metrics.deaths"), value: data.deaths.length, icon: "flower-2" },
   ];
 
   elements.metrics.innerHTML = metrics
@@ -1869,7 +2260,7 @@ function renderWorldDays() {
   const featured = worldDays.length ? worldDays : holidays.slice(0, 3);
 
   if (!featured.length) {
-    elements.worldDays.innerHTML = `<p class="empty-copy">Nessuna ricorrenza trovata per questa data.</p>`;
+    elements.worldDays.innerHTML = `<p class="empty-copy">${t("empty.holidays")}</p>`;
     return;
   }
 
@@ -1878,7 +2269,7 @@ function renderWorldDays() {
       const href = item.url || state.data?.sourceUrl || "#";
       return `
         <a class="world-day" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
-          <span>${escapeHtml(item.title || "Ricorrenza")}</span>
+          <span>${escapeHtml(item.title || categorySingular("holidays"))}</span>
           <small>${escapeHtml(item.text)}</small>
         </a>
       `;
@@ -1889,15 +2280,15 @@ function renderWorldDays() {
 function isWorldDay(text) {
   const lowerText = String(text || "").toLowerCase();
   const hasExactSignal = WORLD_DAY_TERMS.some((term) => lowerText.includes(term));
-  const hasDaySignal = lowerText.includes("giornata") || lowerText.includes("day");
-  const hasGlobalSignal = ["mondiale", "internazionale", "international", "world"].some((term) => lowerText.includes(term));
+  const hasDaySignal = ["giornata", "day", "journée", "tag", "día"].some((term) => lowerText.includes(term));
+  const hasGlobalSignal = ["mondiale", "internazionale", "international", "world", "mondial", "internationale", "welt", "mundial", "internacional"].some((term) => lowerText.includes(term));
   return hasExactSignal || (hasDaySignal && hasGlobalSignal);
 }
 
 function renderSaintsToday() {
   const saints = getSaintCards().slice(0, 3);
   if (!saints.length) {
-    elements.saintsToday.innerHTML = `<p class="empty-copy">Nessun santo trovato nella fonte per questa data.</p>`;
+    elements.saintsToday.innerHTML = `<p class="empty-copy">${t("empty.saints")}</p>`;
     return;
   }
 
@@ -1906,7 +2297,7 @@ function renderSaintsToday() {
       const href = item.url || state.data?.sourceUrl || "#";
       return `
         <a class="saint-day" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
-          <span>${escapeHtml(item.title || "Santo del giorno")}</span>
+          <span>${escapeHtml(item.title || t("blocks.saintOfDay"))}</span>
           <small>${escapeHtml(item.text)}</small>
         </a>
       `;
@@ -1934,7 +2325,7 @@ function renderMemoryToday() {
     elements.memoryToday.innerHTML = `
       <button class="saved-day" type="button" data-auth-open>
         <i data-lucide="log-in" aria-hidden="true"></i>
-        <span>Accedi</span>
+        <span>${t("signIn")}</span>
       </button>
     `;
     bindMemoryShortcutButtons();
@@ -1944,7 +2335,7 @@ function renderMemoryToday() {
 
   const matches = getMemoriesForDate(state.date).slice(0, 3);
   if (!matches.length) {
-    elements.memoryToday.innerHTML = `<p class="empty-copy">Nessun ricordo per questa data.</p>`;
+    elements.memoryToday.innerHTML = `<p class="empty-copy">${t("empty.memories")}</p>`;
     return;
   }
 
@@ -1965,10 +2356,10 @@ function renderMemoryWorkspace() {
       <section class="auth-gate">
         <div class="empty-state">
           <i data-lucide="heart" aria-hidden="true"></i>
-          <p>Accedi per salvare i tuoi ricordi personali.</p>
+          <p>${t("empty.authGate")}</p>
           <button class="text-button primary-action" type="button" data-auth-open>
             <i data-lucide="log-in" aria-hidden="true"></i>
-            Accedi
+            ${t("signIn")}
           </button>
         </div>
       </section>
@@ -1986,43 +2377,43 @@ function renderMemoryWorkspace() {
       <form class="memory-form" id="memoryForm">
         <div class="section-title">
           <i data-lucide="heart-plus" aria-hidden="true"></i>
-          <h2>Nuovo ricordo</h2>
+          <h2>${t("memory.new")}</h2>
         </div>
         <label class="form-field">
-          <span>Titolo</span>
-          <input id="memoryTitle" type="text" maxlength="90" required placeholder="Es. Primo giorno del progetto" />
+          <span>${t("memory.title")}</span>
+          <input id="memoryTitle" type="text" maxlength="90" required placeholder="${escapeAttribute(t("memory.titlePlaceholder"))}" />
         </label>
         <label class="form-field">
-          <span>Data</span>
+          <span>${t("memory.date")}</span>
           <input id="memoryDate" type="date" required value="${toInputDate(state.date)}" />
         </label>
         <label class="form-field">
-          <span>Etichetta</span>
+          <span>${t("memory.kind")}</span>
           <select id="memoryKind">
-            <option value="personale">Personale</option>
-            <option value="famiglia">Famiglia</option>
-            <option value="lavoro">Lavoro</option>
-            <option value="viaggio">Viaggio</option>
-            <option value="traguardo">Traguardo</option>
+            <option value="personale">${t("memory.kinds.personale")}</option>
+            <option value="famiglia">${t("memory.kinds.famiglia")}</option>
+            <option value="lavoro">${t("memory.kinds.lavoro")}</option>
+            <option value="viaggio">${t("memory.kinds.viaggio")}</option>
+            <option value="traguardo">${t("memory.kinds.traguardo")}</option>
           </select>
         </label>
         <label class="form-field">
-          <span>Dettaglio</span>
-          <textarea id="memoryNotes" rows="4" maxlength="420" placeholder="Una nota breve da ritrovare fra un anno"></textarea>
+          <span>${t("memory.detail")}</span>
+          <textarea id="memoryNotes" rows="4" maxlength="420" placeholder="${escapeAttribute(t("memory.detailPlaceholder"))}"></textarea>
         </label>
         <label class="check-field">
           <input id="memoryRepeat" type="checkbox" checked />
-          <span>Ricordamelo ogni anno</span>
+          <span>${t("memory.repeat")}</span>
         </label>
         <button class="text-button primary-action" type="submit">
           <i data-lucide="save" aria-hidden="true"></i>
-          Salva ricordo
+          ${t("memory.save")}
         </button>
       </form>
 
       <div class="memory-lists">
-        ${renderMemoryCollection("Ricordi di questa data", todayMemories, "Nessun ricordo per questa data.")}
-        ${renderMemoryCollection("Archivio personale", allMemories, "Archivio vuoto.")}
+        ${renderMemoryCollection(t("memory.todayList"), todayMemories, t("empty.memories"))}
+        ${renderMemoryCollection(t("memory.archive"), allMemories, t("empty.archive"))}
       </div>
     </section>
   `;
@@ -2050,18 +2441,19 @@ function renderMemoryCard(memory) {
   const date = parseInputDate(memory.date);
   const label = date ? formatDayTitle(date) : memory.date;
   const note = memory.notes ? `<p>${escapeHtml(memory.notes)}</p>` : "";
+  const kindLabel = t(`memory.kinds.${memory.kind || "personale"}`);
   return `
     <article class="memory-card">
       <div>
         <div class="card-meta">
           <span class="year-pill">${escapeHtml(String(memory.year))}</span>
-          <span class="category-pill">${escapeHtml(memory.kind || "personale")}</span>
+          <span class="category-pill">${escapeHtml(kindLabel)}</span>
         </div>
         <h3>${escapeHtml(memory.title)}</h3>
         ${note}
         <small>${escapeHtml(label)} - ${escapeHtml(getMemoryAgeLabel(memory, state.date))}</small>
       </div>
-      <button class="icon-button memory-delete" type="button" title="Elimina" aria-label="Elimina" data-memory-id="${escapeAttribute(memory.id)}">
+      <button class="icon-button memory-delete" type="button" title="${escapeAttribute(t("memory.delete"))}" aria-label="${escapeAttribute(t("memory.delete"))}" data-memory-id="${escapeAttribute(memory.id)}">
         <i data-lucide="trash-2" aria-hidden="true"></i>
       </button>
     </article>
@@ -2129,12 +2521,12 @@ function getMemoriesForDate(date) {
 }
 
 function getMemoryAgeLabel(memory, date) {
-  if (!memory.repeatYearly) return "Solo questa data";
+  if (!memory.repeatYearly) return t("memory.onlyDate");
   const age = date.getFullYear() - Number(memory.year);
-  if (age > 1) return `${age} anni fa`;
-  if (age === 1) return "Un anno fa";
-  if (age === 0) return "Salvato per questo giorno";
-  return "In programma";
+  if (age > 1) return t("memory.manyYears", { count: age });
+  if (age === 1) return t("memory.oneYear");
+  if (age === 0) return t("memory.current");
+  return t("memory.future");
 }
 
 async function createMemory(memory) {
@@ -2201,7 +2593,7 @@ function renderPanels() {
     elements.cardsPanel.innerHTML = `
       <div class="empty-state">
         <i data-lucide="search-x" aria-hidden="true"></i>
-        <p>Nessun risultato per questa selezione.</p>
+        <p>${t("empty.noResults")}</p>
       </div>
     `;
     paintIcons();
@@ -2245,7 +2637,7 @@ function renderCategory(category, cards) {
     <section class="category-section" aria-labelledby="${category}-heading">
       <div class="section-title">
         <i data-lucide="${meta.icon}" aria-hidden="true"></i>
-        <h2 id="${category}-heading">${meta.label}</h2>
+        <h2 id="${category}-heading">${categoryLabel(category)}</h2>
         <span>${cards.length}</span>
       </div>
       <div class="card-grid">
@@ -2263,7 +2655,7 @@ function renderCard(card) {
     card.image ? "" : "is-empty",
     isPersonCard(card) ? "is-person" : "",
   ].filter(Boolean).join(" ");
-  const year = card.year || "Senza data";
+  const year = card.year || t("noYear");
   const href = card.url || state.data?.sourceUrl || "#";
 
   return `
@@ -2274,12 +2666,12 @@ function renderCard(card) {
       <div class="card-body">
         <div class="card-meta">
           <span class="year-pill">${escapeHtml(String(year))}</span>
-          <span class="category-pill">${meta.singular}</span>
+          <span class="category-pill">${categorySingular(card.category)}</span>
         </div>
         <h3>${escapeHtml(card.title)}</h3>
         <p>${escapeHtml(card.text)}</p>
         <a class="card-link" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
-          Fonte
+          ${t("source")}
           <i data-lucide="external-link" aria-hidden="true"></i>
         </a>
       </div>
@@ -2320,18 +2712,22 @@ function buildDayRail() {
 
 function renderSavedDays() {
   if (!state.saved.length) {
-    elements.savedDays.innerHTML = `<p class="empty-copy">Nessuna giornata salvata.</p>`;
+    elements.savedDays.innerHTML = `<p class="empty-copy">${t("empty.savedDays")}</p>`;
     return;
   }
 
   elements.savedDays.innerHTML = state.saved
     .map(
-      (item) => `
+      (item) => {
+        const date = parseInputDate(item.value);
+        const label = date ? formatDayTitle(date) : item.label;
+        return `
         <button class="saved-day" type="button" data-date="${escapeAttribute(item.value)}">
           <i data-lucide="calendar-check" aria-hidden="true"></i>
-          <span>${escapeHtml(item.label)}</span>
+          <span>${escapeHtml(label)}</span>
         </button>
-      `
+      `;
+      }
     )
     .join("");
 
@@ -2345,8 +2741,8 @@ function updateSaveButton() {
   const isSaved = state.saved.some((item) => item.key === keyFromDate(state.date));
   elements.saveDay.classList.toggle("is-saved", isSaved);
   elements.saveDay.innerHTML = isSaved
-    ? `<i data-lucide="bookmark-check" aria-hidden="true"></i> Salvata`
-    : `<i data-lucide="bookmark-plus" aria-hidden="true"></i> Salva`;
+    ? `<i data-lucide="bookmark-check" aria-hidden="true"></i> ${t("saved")}`
+    : `<i data-lucide="bookmark-plus" aria-hidden="true"></i> ${t("save")}`;
   paintIcons();
 }
 
@@ -2407,7 +2803,7 @@ async function setupFirebase() {
 async function applyFirebaseUser(firebaseUser, fallbackName = "") {
   state.currentUser = {
     id: firebaseUser.uid,
-    name: firebaseUser.displayName || fallbackName || firebaseUser.email?.split("@")[0] || "Profilo",
+    name: firebaseUser.displayName || fallbackName || firebaseUser.email?.split("@")[0] || t("auth.profile"),
     email: firebaseUser.email || "",
     provider: "firebase",
   };
@@ -2420,7 +2816,7 @@ async function applyFirebaseUser(firebaseUser, fallbackName = "") {
 
 async function saveFirebaseUserProfile(firebaseUser, fallbackName = "") {
   if (!state.firebase.ready) return;
-  const name = firebaseUser.displayName || fallbackName || firebaseUser.email?.split("@")[0] || "Profilo";
+  const name = firebaseUser.displayName || fallbackName || firebaseUser.email?.split("@")[0] || t("auth.profile");
   await state.firebase.api.setDoc(
     state.firebase.api.doc(state.firebase.db, "users", firebaseUser.uid),
     {
@@ -2434,17 +2830,17 @@ async function saveFirebaseUserProfile(firebaseUser, fallbackName = "") {
 
 function renderAccount() {
   if (state.currentUser) {
-    const firstName = state.currentUser.name.split(" ")[0] || "Profilo";
-    elements.accountButton.title = "Esci";
+    const firstName = state.currentUser.name.split(" ")[0] || t("auth.profile");
+    elements.accountButton.title = t("signOut");
     elements.accountButton.innerHTML = `
       <i data-lucide="log-out" aria-hidden="true"></i>
       ${escapeHtml(firstName)}
     `;
   } else {
-    elements.accountButton.title = "Accedi";
+    elements.accountButton.title = t("signIn");
     elements.accountButton.innerHTML = `
       <i data-lucide="user-round" aria-hidden="true"></i>
-      Accedi
+      ${t("signIn")}
     `;
   }
   paintIcons();
@@ -2472,8 +2868,8 @@ function setAuthMode(mode) {
   elements.authName.required = isRegister;
   elements.authPassword.autocomplete = isRegister ? "new-password" : "current-password";
   elements.authSubmit.innerHTML = isRegister
-    ? `<i data-lucide="user-plus" aria-hidden="true"></i> Registrati`
-    : `<i data-lucide="log-in" aria-hidden="true"></i> Accedi`;
+    ? `<i data-lucide="user-plus" aria-hidden="true"></i> ${t("register")}`
+    : `<i data-lucide="log-in" aria-hidden="true"></i> ${t("signIn")}`;
   paintIcons();
 }
 
@@ -2507,13 +2903,13 @@ async function handleAuthSubmit(event) {
 
     if (state.authMode === "register") {
       if (state.users.some((user) => user.email === email)) {
-        elements.authMessage.textContent = "Email già registrata.";
+        elements.authMessage.textContent = t("auth.emailExists");
         return;
       }
 
       const user = {
         id: makeId("user"),
-        name: name || email.split("@")[0],
+      name: name || email.split("@")[0],
         email,
         passwordHash: await digestPassword(password),
         createdAt: new Date().toISOString(),
@@ -2528,7 +2924,7 @@ async function handleAuthSubmit(event) {
     const passwordHash = await digestPassword(password);
     const user = state.users.find((item) => item.email === email && item.passwordHash === passwordHash);
     if (!user) {
-      elements.authMessage.textContent = "Email o password non corretti.";
+      elements.authMessage.textContent = t("auth.invalidCredentials");
       return;
     }
 
@@ -2567,13 +2963,13 @@ async function signOut() {
 function setLoadingState(date) {
   elements.weekdayLabel.textContent = formatWeekday(date);
   elements.dayTitle.textContent = formatDayTitle(date);
-  elements.daySummary.textContent = "Caricamento della giornata...";
-  elements.sourceState.textContent = "Connessione alla fonte";
+  elements.daySummary.textContent = t("loadingDay");
+  elements.sourceState.textContent = t("loading");
   elements.heroMedia.style.backgroundImage = "";
   elements.heroMedia.classList.add("is-blank");
   elements.metrics.innerHTML = "";
-  elements.worldDays.innerHTML = `<p class="empty-copy">Caricamento...</p>`;
-  elements.saintsToday.innerHTML = `<p class="empty-copy">Caricamento...</p>`;
+  elements.worldDays.innerHTML = `<p class="empty-copy">${t("loading")}</p>`;
+  elements.saintsToday.innerHTML = `<p class="empty-copy">${t("loading")}</p>`;
   elements.cardsPanel.innerHTML = `
     <div class="loading-grid">
       <span></span><span></span><span></span>
@@ -2606,6 +3002,15 @@ function loadSavedDays() {
     return JSON.parse(localStorage.getItem("almanacco.savedDays")) || [];
   } catch {
     return [];
+  }
+}
+
+function loadLanguage() {
+  try {
+    const savedLanguage = localStorage.getItem("indata.language");
+    return SUPPORTED_LANGUAGES.includes(savedLanguage) ? savedLanguage : "it";
+  } catch {
+    return "it";
   }
 }
 
@@ -2713,19 +3118,19 @@ function pad(value) {
 }
 
 function formatDayTitle(date) {
-  return new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long" }).format(date);
+  return new Intl.DateTimeFormat(currentLocale(), { day: "numeric", month: "long" }).format(date);
 }
 
 function formatWeekday(date) {
-  return new Intl.DateTimeFormat("it-IT", { weekday: "long" }).format(date);
+  return new Intl.DateTimeFormat(currentLocale(), { weekday: "long" }).format(date);
 }
 
 function formatShortWeekday(date) {
-  return new Intl.DateTimeFormat("it-IT", { weekday: "short" }).format(date).replace(".", "");
+  return new Intl.DateTimeFormat(currentLocale(), { weekday: "short" }).format(date).replace(".", "");
 }
 
 function formatShortMonth(date) {
-  return new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date).replace(".", "");
+  return new Intl.DateTimeFormat(currentLocale(), { month: "short" }).format(date).replace(".", "");
 }
 
 function isFirebaseConfigured() {
@@ -2738,14 +3143,14 @@ function isFirebaseConfigured() {
 function getFirebaseErrorMessage(error) {
   const code = error?.code || "";
   const messages = {
-    "auth/email-already-in-use": "Email già registrata.",
-    "auth/invalid-email": "Email non valida.",
-    "auth/invalid-credential": "Email o password non corretti.",
-    "auth/weak-password": "Usa una password di almeno 6 caratteri.",
-    "auth/network-request-failed": "Connessione non disponibile. Riprova tra poco.",
-    "permission-denied": "Permessi Firestore non configurati.",
+    "auth/email-already-in-use": t("auth.emailExists"),
+    "auth/invalid-email": t("auth.invalidEmail"),
+    "auth/invalid-credential": t("auth.invalidCredentials"),
+    "auth/weak-password": t("auth.weakPassword"),
+    "auth/network-request-failed": t("auth.network"),
+    "permission-denied": t("auth.permissionDenied"),
   };
-  return messages[code] || "Operazione non riuscita. Controlla Firebase e riprova.";
+  return messages[code] || t("auth.genericError");
 }
 
 async function digestPassword(password) {
@@ -2767,10 +3172,10 @@ function makeId(prefix) {
 }
 
 function getSourceLabel(language) {
-  if (language === "it") return "Fonte aggiornata in italiano";
-  if (language === "it+en") return "Fonte aggiornata in italiano e inglese";
-  if (language === "en") return "Fonte aggiornata in inglese";
-  return "Fonte aggiornata";
+  if (!language || language === "unknown") return t("updatedSource");
+  const languages = language.split("+").filter(Boolean).map(languageName);
+  if (languages.length === 1) return t("updatedSourceLang", { language: languages[0] });
+  return t("updatedSourceMixed", { languages: languages.join(", ") });
 }
 
 function cleanText(text) {
