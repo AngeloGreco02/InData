@@ -579,6 +579,10 @@ a {
   border-top: 4px solid var(--violet);
 }
 
+.saint-block {
+  border-top: 4px solid var(--gold);
+}
+
 .block-heading,
 .section-title {
   display: flex;
@@ -598,6 +602,7 @@ a {
 
 .world-days,
 .saved-days,
+.saints-today,
 .memory-today {
   display: grid;
   gap: 10px;
@@ -605,6 +610,7 @@ a {
 }
 
 .world-day,
+.saint-day,
 .saved-day {
   display: grid;
   gap: 4px;
@@ -623,6 +629,20 @@ a {
 }
 
 .world-day small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.saint-day {
+  background: #fbf6eb;
+  border-color: rgba(183, 121, 31, 0.22);
+}
+
+.saint-day span {
+  font-weight: 850;
+}
+
+.saint-day small {
   color: var(--muted);
   line-height: 1.45;
 }
@@ -1121,6 +1141,10 @@ svg {
               <i data-lucide="globe-2" aria-hidden="true"></i>
               Giornate
             </button>
+            <button class="tab" type="button" data-tab="saints">
+              <i data-lucide="church" aria-hidden="true"></i>
+              Santo
+            </button>
             <button class="tab" type="button" data-tab="events">
               <i data-lucide="landmark" aria-hidden="true"></i>
               Storia
@@ -1165,6 +1189,14 @@ svg {
                 <h2>Quadro rapido</h2>
               </div>
               <div class="metric-grid" id="metrics"></div>
+            </article>
+
+            <article class="insight-block saint-block">
+              <div class="block-heading">
+                <i data-lucide="church" aria-hidden="true"></i>
+                <h2>Santo del giorno</h2>
+              </div>
+              <div id="saintsToday" class="saints-today"></div>
             </article>
 
             <article class="insight-block saved-block">
@@ -1281,6 +1313,11 @@ const CATEGORY_META = {
     singular: "Ricorrenza",
     icon: "globe-2",
   },
+  saints: {
+    label: "Santo",
+    singular: "Santo",
+    icon: "church",
+  },
   events: {
     label: "Storia",
     singular: "Evento",
@@ -1308,7 +1345,8 @@ const CATEGORY_META = {
   },
 };
 
-const CATEGORY_ORDER = ["holidays", "events", "births", "deaths", "selected"];
+const CATEGORY_ORDER = ["holidays", "saints", "events", "births", "deaths", "selected"];
+const DATA_CATEGORY_ORDER = ["holidays", "events", "births", "deaths", "selected"];
 const FILL_LIMITS = {
   selected: 6,
   holidays: 8,
@@ -1325,6 +1363,22 @@ const WORLD_DAY_TERMS = [
   "united nations",
   "nazioni unite",
   "onu",
+];
+
+const SAINT_TERMS = [
+  "san ",
+  "sant'",
+  "santa ",
+  "santo ",
+  "santi ",
+  "saint ",
+  "st. ",
+  "feast",
+  "martyr",
+  "martire",
+  "vescovo",
+  "apostolo",
+  "liturg",
 ];
 
 const FALLBACK_DATA = {
@@ -1420,6 +1474,7 @@ const elements = {
   savedDays: document.querySelector("#savedDays"),
   metrics: document.querySelector("#metrics"),
   worldDays: document.querySelector("#worldDays"),
+  saintsToday: document.querySelector("#saintsToday"),
   memoryToday: document.querySelector("#memoryToday"),
   cardsPanel: document.querySelector("#cardsPanel"),
   overviewPanel: document.querySelector("#overviewPanel"),
@@ -1620,7 +1675,7 @@ function mergeLanguagePayloads(payloads) {
     sourceUrl: primary.sourceUrl || "https://www.mediawiki.org/wiki/Wikimedia_APIs",
   };
 
-  for (const category of CATEGORY_ORDER) {
+  for (const category of DATA_CATEGORY_ORDER) {
     const primaryItems = Array.isArray(primary[category]) ? primary[category] : [];
     const minimum = FILL_LIMITS[category] || 8;
     if (primaryItems.length >= minimum || payloads.length === 1) {
@@ -1652,7 +1707,7 @@ function mergeItems(primaryItems, candidates) {
 
 function normalizeData(raw, month, day) {
   const sourceUrl = raw.sourceUrl || "https://www.mediawiki.org/wiki/Wikimedia_APIs";
-  const buckets = CATEGORY_ORDER.reduce((accumulator, key) => {
+  const buckets = DATA_CATEGORY_ORDER.reduce((accumulator, key) => {
     accumulator[key] = dedupeItems(Array.isArray(raw[key]) ? raw[key] : [], key);
     return accumulator;
   }, {});
@@ -1727,6 +1782,7 @@ function renderAll(flags = {}) {
   renderHero(flags);
   renderMetrics();
   renderWorldDays();
+  renderSaintsToday();
   renderMemoryToday();
   renderPanels();
   renderSavedDays();
@@ -1822,6 +1878,41 @@ function isWorldDay(text) {
   const hasDaySignal = lowerText.includes("giornata") || lowerText.includes("day");
   const hasGlobalSignal = ["mondiale", "internazionale", "international", "world"].some((term) => lowerText.includes(term));
   return hasExactSignal || (hasDaySignal && hasGlobalSignal);
+}
+
+function renderSaintsToday() {
+  const saints = getSaintCards().slice(0, 3);
+  if (!saints.length) {
+    elements.saintsToday.innerHTML = `<p class="empty-copy">Nessun santo trovato nella fonte per questa data.</p>`;
+    return;
+  }
+
+  elements.saintsToday.innerHTML = saints
+    .map((item) => {
+      const href = item.url || state.data?.sourceUrl || "#";
+      return `
+        <a class="saint-day" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
+          <span>${escapeHtml(item.title || "Santo del giorno")}</span>
+          <small>${escapeHtml(item.text)}</small>
+        </a>
+      `;
+    })
+    .join("");
+}
+
+function getSaintCards() {
+  const sourceItems = [
+    ...(state.data?.holidays || []),
+    ...(state.data?.selected || []),
+  ];
+  return sourceItems
+    .map((item) => toCard(item, "saints"))
+    .filter((item) => isSaintDay(`${item.title} ${item.text} ${item.description}`));
+}
+
+function isSaintDay(text) {
+  const lowerText = String(text || "").toLowerCase();
+  return SAINT_TERMS.some((term) => lowerText.includes(term));
 }
 
 function renderMemoryToday() {
@@ -2113,7 +2204,9 @@ function renderPanels() {
 
 function getVisibleCards() {
   const data = state.data || makeEmptyDay();
-  const base = state.activeTab === "overview"
+  const base = state.activeTab === "saints"
+    ? getSaintCards()
+    : state.activeTab === "overview"
     ? [...data.holidays.map((item) => toCard(item, "holidays")).slice(0, 5), ...data.events.map((item) => toCard(item, "events")).slice(0, 8), ...data.births.map((item) => toCard(item, "births")).slice(0, 6), ...data.deaths.map((item) => toCard(item, "deaths")).slice(0, 6)]
     : (data[state.activeTab] || []).map((item) => toCard(item, state.activeTab));
 
@@ -2457,6 +2550,7 @@ function setLoadingState(date) {
   elements.heroMedia.classList.add("is-blank");
   elements.metrics.innerHTML = "";
   elements.worldDays.innerHTML = `<p class="empty-copy">Caricamento...</p>`;
+  elements.saintsToday.innerHTML = `<p class="empty-copy">Caricamento...</p>`;
   elements.cardsPanel.innerHTML = `
     <div class="loading-grid">
       <span></span><span></span><span></span>
