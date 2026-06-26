@@ -386,6 +386,10 @@ a {
   transform: scale(1.01);
 }
 
+.hero-media.is-person {
+  background-position: center 18%;
+}
+
 .hero-media.is-blank {
   background:
     linear-gradient(135deg, rgba(47, 104, 184, 0.65), rgba(45, 122, 98, 0.78)),
@@ -842,6 +846,13 @@ a {
   background-color: #e7ecef;
   background-position: center;
   background-size: cover;
+}
+
+.card-image.is-person {
+  background-color: #eef2f4;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .card-image.is-empty {
@@ -1806,14 +1817,17 @@ function renderHero(flags) {
     if (hero.image) {
       elements.heroMedia.style.backgroundImage = `linear-gradient(90deg, rgba(15, 20, 24, 0.78), rgba(15, 20, 24, 0.30)), url("${hero.image}")`;
       elements.heroMedia.classList.remove("is-blank");
+      elements.heroMedia.classList.toggle("is-person", isPersonCard(hero));
     } else {
       elements.heroMedia.style.backgroundImage = "";
       elements.heroMedia.classList.add("is-blank");
+      elements.heroMedia.classList.remove("is-person");
     }
   } else {
     elements.daySummary.textContent = "Nessun dato disponibile per questa data.";
     elements.heroMedia.style.backgroundImage = "";
     elements.heroMedia.classList.add("is-blank");
+    elements.heroMedia.classList.remove("is-person");
   }
 
   if (flags.fallback) {
@@ -2244,12 +2258,17 @@ function renderCategory(category, cards) {
 function renderCard(card) {
   const meta = CATEGORY_META[card.category] || CATEGORY_META.events;
   const imageStyle = card.image ? `style="background-image: url('${escapeAttribute(card.image)}')"` : "";
+  const imageClass = [
+    "card-image",
+    card.image ? "" : "is-empty",
+    isPersonCard(card) ? "is-person" : "",
+  ].filter(Boolean).join(" ");
   const year = card.year || "Senza data";
   const href = card.url || state.data?.sourceUrl || "#";
 
   return `
     <article class="info-card">
-      <div class="card-image ${card.image ? "" : "is-empty"}" ${imageStyle} aria-hidden="true">
+      <div class="${imageClass}" ${imageStyle} aria-hidden="true">
         ${card.image ? "" : `<i data-lucide="${meta.icon}"></i>`}
       </div>
       <div class="card-body">
@@ -2266,6 +2285,10 @@ function renderCard(card) {
       </div>
     </article>
   `;
+}
+
+function isPersonCard(card) {
+  return card.category === "births" || card.category === "deaths";
 }
 
 function buildDayRail() {
