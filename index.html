@@ -1180,7 +1180,7 @@ svg {
             </button>
             <button class="tab" type="button" data-tab="saints">
               <i data-lucide="church" aria-hidden="true"></i>
-              Santo
+              Santi
             </button>
             <button class="tab" type="button" data-tab="events">
               <i data-lucide="landmark" aria-hidden="true"></i>
@@ -1231,7 +1231,7 @@ svg {
             <article class="insight-block saint-block">
               <div class="block-heading">
                 <i data-lucide="church" aria-hidden="true"></i>
-                <h2>Santo del giorno</h2>
+                <h2>Santi del giorno</h2>
               </div>
               <div id="saintsToday" class="saints-today"></div>
             </article>
@@ -1361,7 +1361,7 @@ const I18N = {
     category: {
       overview: "Sintesi",
       holidays: "Giornate",
-      saints: "Santo",
+      saints: "Santi",
       events: "Storia",
       births: "Nati",
       deaths: "Morti",
@@ -1370,7 +1370,7 @@ const I18N = {
     },
     singular: {
       holidays: "Ricorrenza",
-      saints: "Santo",
+      saints: "Santo/beato",
       events: "Evento",
       births: "Nascita",
       deaths: "Scomparsa",
@@ -1380,7 +1380,7 @@ const I18N = {
     blocks: {
       worldDay: "Giornata mondiale",
       quickSummary: "Quadro rapido",
-      saintOfDay: "Santo del giorno",
+      saintOfDay: "Santi del giorno",
       savedDays: "Giornate salvate",
       personalMemories: "Ricordi personali",
     },
@@ -1392,7 +1392,7 @@ const I18N = {
     },
     empty: {
       holidays: "Nessuna ricorrenza trovata per questa data.",
-      saints: "Nessun santo trovato nella fonte per questa data.",
+      saints: "Nessun santo o beato verificato nella fonte per questa data.",
       savedDays: "Nessuna giornata salvata.",
       memories: "Nessun ricordo per questa data.",
       noResults: "Nessun risultato per questa selezione.",
@@ -1462,11 +1462,11 @@ const I18N = {
     updatedSource: "Source mise à jour",
     updatedSourceLang: "Source mise à jour en {language}",
     updatedSourceMixed: "Source mise à jour en {languages}",
-    category: { overview: "Synthèse", holidays: "Journées", saints: "Saint", events: "Histoire", births: "Naissances", deaths: "Décès", selected: "À la une", memories: "Souvenirs" },
-    singular: { holidays: "Commémoration", saints: "Saint", events: "Événement", births: "Naissance", deaths: "Décès", selected: "Focus", memories: "Souvenir" },
-    blocks: { worldDay: "Journée mondiale", quickSummary: "Résumé rapide", saintOfDay: "Saint du jour", savedDays: "Jours enregistrés", personalMemories: "Souvenirs personnels" },
+    category: { overview: "Synthèse", holidays: "Journées", saints: "Saints", events: "Histoire", births: "Naissances", deaths: "Décès", selected: "À la une", memories: "Souvenirs" },
+    singular: { holidays: "Commémoration", saints: "Saint/bienheureux", events: "Événement", births: "Naissance", deaths: "Décès", selected: "Focus", memories: "Souvenir" },
+    blocks: { worldDay: "Journée mondiale", quickSummary: "Résumé rapide", saintOfDay: "Saints du jour", savedDays: "Jours enregistrés", personalMemories: "Souvenirs personnels" },
     metrics: { holidays: "Commémorations", events: "Événements", births: "Naissances", deaths: "Décès" },
-    empty: { holidays: "Aucune commémoration trouvée pour cette date.", saints: "Aucun saint trouvé dans la source pour cette date.", savedDays: "Aucun jour enregistré.", memories: "Aucun souvenir pour cette date.", noResults: "Aucun résultat pour cette sélection.", authGate: "Connectez-vous pour enregistrer vos souvenirs personnels.", archive: "Archive vide." },
+    empty: { holidays: "Aucune commémoration trouvée pour cette date.", saints: "Aucun saint ou bienheureux vérifié dans la source pour cette date.", savedDays: "Aucun jour enregistré.", memories: "Aucun souvenir pour cette date.", noResults: "Aucun résultat pour cette sélection.", authGate: "Connectez-vous pour enregistrer vos souvenirs personnels.", archive: "Archive vide." },
     memory: {
       new: "Nouveau souvenir", title: "Titre", titlePlaceholder: "Ex. Premier jour du projet", date: "Date", kind: "Étiquette", detail: "Détail", detailPlaceholder: "Une courte note à retrouver dans un an", repeat: "Me le rappeler chaque année", save: "Enregistrer le souvenir", todayList: "Souvenirs de cette date", archive: "Archive personnelle", delete: "Supprimer", onlyDate: "Seulement cette date", oneYear: "Il y a un an", manyYears: "Il y a {count} ans", current: "Enregistré pour ce jour", future: "Prévu",
       kinds: { personale: "Personnel", famiglia: "Famille", lavoro: "Travail", viaggio: "Voyage", traguardo: "Étape importante" },
@@ -1496,11 +1496,11 @@ const I18N = {
     updatedSource: "Updated source",
     updatedSourceLang: "Source updated in {language}",
     updatedSourceMixed: "Source updated in {languages}",
-    category: { overview: "Overview", holidays: "Days", saints: "Saint", events: "History", births: "Births", deaths: "Deaths", selected: "Featured", memories: "Memories" },
-    singular: { holidays: "Observance", saints: "Saint", events: "Event", births: "Birth", deaths: "Death", selected: "Focus", memories: "Memory" },
-    blocks: { worldDay: "World day", quickSummary: "Quick summary", saintOfDay: "Saint of the day", savedDays: "Saved days", personalMemories: "Personal memories" },
+    category: { overview: "Overview", holidays: "Days", saints: "Saints", events: "History", births: "Births", deaths: "Deaths", selected: "Featured", memories: "Memories" },
+    singular: { holidays: "Observance", saints: "Saint/blessed", events: "Event", births: "Birth", deaths: "Death", selected: "Focus", memories: "Memory" },
+    blocks: { worldDay: "World day", quickSummary: "Quick summary", saintOfDay: "Saints of the day", savedDays: "Saved days", personalMemories: "Personal memories" },
     metrics: { holidays: "Observances", events: "Events", births: "Births", deaths: "Deaths" },
-    empty: { holidays: "No observance found for this date.", saints: "No saint found in the source for this date.", savedDays: "No saved days.", memories: "No memories for this date.", noResults: "No results for this selection.", authGate: "Sign in to save your personal memories.", archive: "Archive is empty." },
+    empty: { holidays: "No observance found for this date.", saints: "No verified saint or blessed found in the source for this date.", savedDays: "No saved days.", memories: "No memories for this date.", noResults: "No results for this selection.", authGate: "Sign in to save your personal memories.", archive: "Archive is empty." },
     memory: {
       new: "New memory", title: "Title", titlePlaceholder: "Example: First day of the project", date: "Date", kind: "Label", detail: "Details", detailPlaceholder: "A short note to find again next year", repeat: "Remind me every year", save: "Save memory", todayList: "Memories for this date", archive: "Personal archive", delete: "Delete", onlyDate: "Only this date", oneYear: "One year ago", manyYears: "{count} years ago", current: "Saved for this day", future: "Scheduled",
       kinds: { personale: "Personal", famiglia: "Family", lavoro: "Work", viaggio: "Travel", traguardo: "Milestone" },
@@ -1531,10 +1531,10 @@ const I18N = {
     updatedSourceLang: "Quelle auf {language} aktualisiert",
     updatedSourceMixed: "Quelle in {languages} aktualisiert",
     category: { overview: "Übersicht", holidays: "Gedenktage", saints: "Heilige", events: "Geschichte", births: "Geboren", deaths: "Gestorben", selected: "Ausgewählt", memories: "Erinnerungen" },
-    singular: { holidays: "Gedenktag", saints: "Heilige/r", events: "Ereignis", births: "Geburt", deaths: "Tod", selected: "Fokus", memories: "Erinnerung" },
-    blocks: { worldDay: "Welttag", quickSummary: "Kurzüberblick", saintOfDay: "Heilige/r des Tages", savedDays: "Gespeicherte Tage", personalMemories: "Persönliche Erinnerungen" },
+    singular: { holidays: "Gedenktag", saints: "Heilige/r bzw. Selige/r", events: "Ereignis", births: "Geburt", deaths: "Tod", selected: "Fokus", memories: "Erinnerung" },
+    blocks: { worldDay: "Welttag", quickSummary: "Kurzüberblick", saintOfDay: "Heilige des Tages", savedDays: "Gespeicherte Tage", personalMemories: "Persönliche Erinnerungen" },
     metrics: { holidays: "Gedenktage", events: "Ereignisse", births: "Geburten", deaths: "Todesfälle" },
-    empty: { holidays: "Kein Gedenktag für dieses Datum gefunden.", saints: "Keine Heiligenangabe in der Quelle für dieses Datum gefunden.", savedDays: "Keine gespeicherten Tage.", memories: "Keine Erinnerungen für dieses Datum.", noResults: "Keine Ergebnisse für diese Auswahl.", authGate: "Melde dich an, um persönliche Erinnerungen zu speichern.", archive: "Archiv ist leer." },
+    empty: { holidays: "Kein Gedenktag für dieses Datum gefunden.", saints: "Keine verifizierte Angabe zu Heiligen oder Seligen in der Quelle für dieses Datum gefunden.", savedDays: "Keine gespeicherten Tage.", memories: "Keine Erinnerungen für dieses Datum.", noResults: "Keine Ergebnisse für diese Auswahl.", authGate: "Melde dich an, um persönliche Erinnerungen zu speichern.", archive: "Archiv ist leer." },
     memory: {
       new: "Neue Erinnerung", title: "Titel", titlePlaceholder: "Z. B. Erster Projekttag", date: "Datum", kind: "Label", detail: "Details", detailPlaceholder: "Eine kurze Notiz für nächstes Jahr", repeat: "Jedes Jahr erinnern", save: "Erinnerung speichern", todayList: "Erinnerungen für dieses Datum", archive: "Persönliches Archiv", delete: "Löschen", onlyDate: "Nur dieses Datum", oneYear: "Vor einem Jahr", manyYears: "Vor {count} Jahren", current: "Für diesen Tag gespeichert", future: "Geplant",
       kinds: { personale: "Persönlich", famiglia: "Familie", lavoro: "Arbeit", viaggio: "Reise", traguardo: "Meilenstein" },
@@ -1564,11 +1564,11 @@ const I18N = {
     updatedSource: "Fuente actualizada",
     updatedSourceLang: "Fuente actualizada en {language}",
     updatedSourceMixed: "Fuente actualizada en {languages}",
-    category: { overview: "Resumen", holidays: "Días", saints: "Santo", events: "Historia", births: "Nacidos", deaths: "Fallecidos", selected: "Destacado", memories: "Recuerdos" },
-    singular: { holidays: "Conmemoración", saints: "Santo", events: "Evento", births: "Nacimiento", deaths: "Fallecimiento", selected: "Foco", memories: "Recuerdo" },
-    blocks: { worldDay: "Día mundial", quickSummary: "Resumen rápido", saintOfDay: "Santo del día", savedDays: "Días guardados", personalMemories: "Recuerdos personales" },
+    category: { overview: "Resumen", holidays: "Días", saints: "Santos", events: "Historia", births: "Nacidos", deaths: "Fallecidos", selected: "Destacado", memories: "Recuerdos" },
+    singular: { holidays: "Conmemoración", saints: "Santo/beato", events: "Evento", births: "Nacimiento", deaths: "Fallecimiento", selected: "Foco", memories: "Recuerdo" },
+    blocks: { worldDay: "Día mundial", quickSummary: "Resumen rápido", saintOfDay: "Santos del día", savedDays: "Días guardados", personalMemories: "Recuerdos personales" },
     metrics: { holidays: "Conmemoraciones", events: "Eventos", births: "Nacimientos", deaths: "Fallecimientos" },
-    empty: { holidays: "No se encontró ninguna conmemoración para esta fecha.", saints: "No se encontró ningún santo en la fuente para esta fecha.", savedDays: "No hay días guardados.", memories: "No hay recuerdos para esta fecha.", noResults: "No hay resultados para esta selección.", authGate: "Accede para guardar tus recuerdos personales.", archive: "Archivo vacío." },
+    empty: { holidays: "No se encontró ninguna conmemoración para esta fecha.", saints: "No se encontró ningún santo o beato verificado en la fuente para esta fecha.", savedDays: "No hay días guardados.", memories: "No hay recuerdos para esta fecha.", noResults: "No hay resultados para esta selección.", authGate: "Accede para guardar tus recuerdos personales.", archive: "Archivo vacío." },
     memory: {
       new: "Nuevo recuerdo", title: "Título", titlePlaceholder: "Ej. Primer día del proyecto", date: "Fecha", kind: "Etiqueta", detail: "Detalle", detailPlaceholder: "Una nota breve para encontrar dentro de un año", repeat: "Recordármelo cada año", save: "Guardar recuerdo", todayList: "Recuerdos de esta fecha", archive: "Archivo personal", delete: "Eliminar", onlyDate: "Solo esta fecha", oneYear: "Hace un año", manyYears: "Hace {count} años", current: "Guardado para este día", future: "Programado",
       kinds: { personale: "Personal", famiglia: "Familia", lavoro: "Trabajo", viaggio: "Viaje", traguardo: "Meta" },
@@ -1602,8 +1602,8 @@ const CATEGORY_META = {
     icon: "globe-2",
   },
   saints: {
-    label: "Santo",
-    singular: "Santo",
+    label: "Santi",
+    singular: "Santo/beato",
     icon: "church",
   },
   events: {
@@ -1662,26 +1662,144 @@ const WORLD_DAY_TERMS = [
   "naciones unidas",
 ];
 
-const SAINT_TERMS = [
+const SAINT_NAME_TERMS = [
   "san ",
   "sant'",
   "santa ",
   "santo ",
   "santi ",
+  "beato ",
+  "beata ",
+  "beati ",
+  "beate ",
   "saint ",
+  "saints ",
   "st. ",
-  "feast",
-  "martyr",
-  "martire",
-  "vescovo",
-  "apostolo",
-  "liturg",
   "sainte ",
+  "saintes ",
   "heilige",
   "heiliger",
+  "selige",
+  "seliger",
+  "santos ",
+  "santas ",
+  "beatos ",
+  "beatas ",
+];
+
+const SAINT_CONTEXT_TERMS = [
+  "cristianesimo",
+  "religiose",
+  "chiesa cattolica",
+  "martirologio",
+  "christian feast day",
+  "feast day",
+  "catholic church",
+  "roman martyrology",
+  "liturg",
+  "religious observance",
+  "religieuses",
+  "église catholique",
+  "eglise catholique",
+  "martyrologe",
+  "christlicher gedenktag",
+  "katholische kirche",
+  "römisches martyrologium",
+  "religiosas",
+  "iglesia católica",
+  "martirologio romano",
+];
+
+const SAINT_ROLE_TERMS = [
+  "martire",
+  "martiri",
+  "vescovo",
+  "vescovi",
+  "apostolo",
+  "apostoli",
+  "abate",
+  "badessa",
+  "vergine",
+  "vergini",
+  "sacerdote",
+  "eremita",
+  "monaco",
+  "monaca",
+  "fondatore",
+  "fondatrice",
+  "martyr",
+  "martyrs",
+  "bishop",
+  "apostle",
+  "abbot",
+  "virgin",
+  "priest",
+  "hermit",
+  "monk",
+  "founder",
+  "évêque",
+  "eveque",
+  "apôtre",
+  "apotre",
+  "abbé",
+  "abbe",
+  "vierge",
+  "prêtre",
+  "pretre",
+  "ermite",
   "apóstol",
   "mártir",
   "obispo",
+  "abad",
+  "sacerdote",
+  "monje",
+  "ermitaño",
+  "virgen",
+  "bischof",
+  "märtyrer",
+  "maertyrer",
+  "apostel",
+  "abt",
+  "priester",
+  "einsiedler",
+  "mönch",
+  "moench",
+];
+
+const NON_SAINT_RELIGIOUS_TERMS = [
+  "corpus christi",
+  "easter",
+  "pentecost",
+  "trinity sunday",
+  "ash wednesday",
+  "mardi gras",
+  "christmas",
+  "pasqua",
+  "pentecoste",
+  "natale",
+  "mercoledì delle ceneri",
+  "mercoledi delle ceneri",
+  "cendres",
+  "pâques",
+  "paques",
+  "weihnachten",
+  "ostern",
+  "pfingsten",
+  "navidad",
+  "pascua",
+  "pentecostés",
+  "pentecostes",
+];
+
+const CIVIL_OBSERVANCE_TERMS = [
+  ...WORLD_DAY_TERMS,
+  "giorno dell'indipendenza",
+  "independence day",
+  "fête nationale",
+  "fete nationale",
+  "nationalfeiertag",
+  "día de la independencia",
+  "dia de la independencia",
 ];
 
 const FALLBACK_DATA = {
@@ -2317,7 +2435,16 @@ function getSaintCards() {
 
 function isSaintDay(text) {
   const lowerText = String(text || "").toLowerCase();
-  return SAINT_TERMS.some((term) => lowerText.includes(term));
+  const hasSaintName = SAINT_NAME_TERMS.some((term) => lowerText.includes(term));
+  const hasReligiousContext = SAINT_CONTEXT_TERMS.some((term) => lowerText.includes(term));
+  const hasSaintRole = SAINT_ROLE_TERMS.some((term) => lowerText.includes(term));
+  const isGenericReligiousDay = NON_SAINT_RELIGIOUS_TERMS.some((term) => lowerText.includes(term));
+  const isCivilObservance = CIVIL_OBSERVANCE_TERMS.some((term) => lowerText.includes(term));
+
+  if (isCivilObservance) return false;
+  if (isGenericReligiousDay && !hasSaintName && !hasSaintRole) return false;
+
+  return (hasSaintName && (hasReligiousContext || hasSaintRole)) || (hasReligiousContext && hasSaintRole);
 }
 
 function renderMemoryToday() {
