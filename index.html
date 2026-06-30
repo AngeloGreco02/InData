@@ -362,6 +362,63 @@ a {
   color: var(--green);
 }
 
+.google-auth {
+  display: grid;
+  gap: 14px;
+}
+
+.google-auth[hidden] {
+  display: none;
+}
+
+.google-auth-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  width: 100%;
+  padding: 0 16px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-weight: 850;
+}
+
+.google-auth-button:hover {
+  border-color: rgba(23, 32, 38, 0.32);
+  box-shadow: 0 8px 22px rgba(23, 32, 38, 0.08);
+}
+
+.google-mark {
+  font-family: Arial, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  background: conic-gradient(from -45deg, #4285f4 0 25%, #34a853 0 42%, #fbbc05 0 67%, #ea4335 0 84%, #4285f4 0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.auth-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  height: 1px;
+  content: "";
+  background: var(--line);
+}
+
 .auth-form,
 .memory-form {
   display: grid;
@@ -1396,6 +1453,14 @@ svg {
           <span>Con un profilo, i ricordi vengono salvati nel tuo spazio privato.</span>
         </div>
 
+        <div class="google-auth" id="googleAuthBlock" hidden>
+          <button class="google-auth-button" id="authGoogle" type="button">
+            <span class="google-mark" aria-hidden="true">G</span>
+            <span>Continua con Google</span>
+          </button>
+          <div class="auth-divider"><span>oppure</span></div>
+        </div>
+
         <form class="auth-form" id="authForm">
           <label class="form-field" id="nameField">
             <span>Nome</span>
@@ -1542,12 +1607,17 @@ const I18N = {
       email: "Email",
       password: "Password",
       profile: "Profilo",
+      google: "Continua con Google",
+      or: "oppure",
       emailExists: "Email già registrata.",
       invalidEmail: "Email non valida.",
       invalidCredentials: "Email o password non corretti.",
       weakPassword: "Usa una password di almeno 6 caratteri.",
       network: "Connessione non disponibile. Riprova tra poco.",
       permissionDenied: "Permessi Firestore non configurati.",
+      popupClosed: "Accesso con Google annullato.",
+      unauthorizedDomain: "Questo dominio non è ancora autorizzato in Firebase.",
+      accountConflict: "Questa email è già collegata a un altro metodo di accesso.",
       genericError: "Operazione non riuscita. Controlla Firebase e riprova.",
     },
     profile: {
@@ -1600,7 +1670,7 @@ const I18N = {
       new: "Nouveau souvenir", title: "Titre", titlePlaceholder: "Ex. Premier jour du projet", date: "Date", kind: "Étiquette", detail: "Détail", detailPlaceholder: "Écrivez librement ce que vous souhaitez retenir", repeat: "Me le rappeler chaque année", save: "Enregistrer le souvenir", todayList: "Souvenirs de cette date", archive: "Archive personnelle", delete: "Supprimer", onlyDate: "Seulement cette date", oneYear: "Il y a un an", manyYears: "Il y a {count} ans", current: "Enregistré pour ce jour", future: "Prévu",
       kinds: { personale: "Personnel", famiglia: "Famille", lavoro: "Travail", viaggio: "Voyage", traguardo: "Étape importante" },
     },
-    auth: { name: "Nom", email: "Email", password: "Mot de passe", profile: "Profil", emailExists: "Email déjà enregistrée.", invalidEmail: "Email non valide.", invalidCredentials: "Email ou mot de passe incorrect.", weakPassword: "Utilisez un mot de passe d’au moins 6 caractères.", network: "Connexion indisponible. Réessayez plus tard.", permissionDenied: "Autorisations Firestore non configurées.", genericError: "Opération échouée. Vérifiez Firebase et réessayez." },
+    auth: { name: "Nom", email: "Email", password: "Mot de passe", profile: "Profil", google: "Continuer avec Google", or: "ou", emailExists: "Email déjà enregistrée.", invalidEmail: "Email non valide.", invalidCredentials: "Email ou mot de passe incorrect.", weakPassword: "Utilisez un mot de passe d’au moins 6 caractères.", network: "Connexion indisponible. Réessayez plus tard.", permissionDenied: "Autorisations Firestore non configurées.", popupClosed: "Connexion avec Google annulée.", unauthorizedDomain: "Ce domaine n’est pas encore autorisé dans Firebase.", accountConflict: "Cet e-mail est déjà associé à une autre méthode de connexion.", genericError: "Opération échouée. Vérifiez Firebase et réessayez." },
     profile: { privateTitle: "Profil privé", signedOut: "Créez un profil pour écrire vos souvenirs personnels dans un espace séparé.", signedIn: "Profil actif", cloudActive: "Cloud privé actif", localOnly: "Local uniquement dans ce navigateur", cloudExplain: "Vos souvenirs sont enregistrés dans votre espace utilisateur Firebase.", localExplain: "Sans cloud, vos souvenirs restent seulement dans ce navigateur.", privateRule: "Dans l’application, seul votre compte peut lire et écrire vos souvenirs.", writeFreely: "Vous pouvez écrire notes, dates et événements personnels plus sereinement.", createProfile: "Créer un profil", openMemories: "Écrire un souvenir", memoryCloud: "Espace privé : ce souvenir sera enregistré dans votre profil cloud.", memoryLocal: "Espace local : ce souvenir reste dans ce navigateur jusqu’à votre connexion.", authTrust: "Avec un profil, vos souvenirs sont enregistrés dans votre espace privé." },
     noYear: "Sans date",
     almanac: "Almanach",
@@ -1636,7 +1706,7 @@ const I18N = {
       new: "New memory", title: "Title", titlePlaceholder: "Example: First day of the project", date: "Date", kind: "Label", detail: "Details", detailPlaceholder: "Write freely what you want to remember", repeat: "Remind me every year", save: "Save memory", todayList: "Memories for this date", archive: "Personal archive", delete: "Delete", onlyDate: "Only this date", oneYear: "One year ago", manyYears: "{count} years ago", current: "Saved for this day", future: "Scheduled",
       kinds: { personale: "Personal", famiglia: "Family", lavoro: "Work", viaggio: "Travel", traguardo: "Milestone" },
     },
-    auth: { name: "Name", email: "Email", password: "Password", profile: "Profile", emailExists: "Email already registered.", invalidEmail: "Invalid email.", invalidCredentials: "Email or password is incorrect.", weakPassword: "Use a password of at least 6 characters.", network: "Connection unavailable. Try again shortly.", permissionDenied: "Firestore permissions are not configured.", genericError: "Operation failed. Check Firebase and try again." },
+    auth: { name: "Name", email: "Email", password: "Password", profile: "Profile", google: "Continue with Google", or: "or", emailExists: "Email already registered.", invalidEmail: "Invalid email.", invalidCredentials: "Email or password is incorrect.", weakPassword: "Use a password of at least 6 characters.", network: "Connection unavailable. Try again shortly.", permissionDenied: "Firestore permissions are not configured.", popupClosed: "Google sign-in was cancelled.", unauthorizedDomain: "This domain is not authorized in Firebase yet.", accountConflict: "This email is already linked to another sign-in method.", genericError: "Operation failed. Check Firebase and try again." },
     profile: { privateTitle: "Private profile", signedOut: "Create a profile to write personal memories in a separate space.", signedIn: "Active profile", cloudActive: "Private cloud active", localOnly: "Local only in this browser", cloudExplain: "Your memories are saved in your Firebase user space.", localExplain: "Without cloud, memories stay only in this browser.", privateRule: "In the app, only your account can read and write your memories.", writeFreely: "You can write notes, dates and personal events with more confidence.", createProfile: "Create profile", openMemories: "Write memories", memoryCloud: "Private space: this memory will be saved in your cloud profile.", memoryLocal: "Local space: this memory stays in this browser until you sign in.", authTrust: "With a profile, memories are saved in your private space." },
     noYear: "No year",
     almanac: "Almanac",
@@ -1672,7 +1742,7 @@ const I18N = {
       new: "Neue Erinnerung", title: "Titel", titlePlaceholder: "Z. B. Erster Projekttag", date: "Datum", kind: "Label", detail: "Details", detailPlaceholder: "Schreibe frei, was du festhalten möchtest", repeat: "Jedes Jahr erinnern", save: "Erinnerung speichern", todayList: "Erinnerungen für dieses Datum", archive: "Persönliches Archiv", delete: "Löschen", onlyDate: "Nur dieses Datum", oneYear: "Vor einem Jahr", manyYears: "Vor {count} Jahren", current: "Für diesen Tag gespeichert", future: "Geplant",
       kinds: { personale: "Persönlich", famiglia: "Familie", lavoro: "Arbeit", viaggio: "Reise", traguardo: "Meilenstein" },
     },
-    auth: { name: "Name", email: "E-Mail", password: "Passwort", profile: "Profil", emailExists: "E-Mail ist bereits registriert.", invalidEmail: "Ungültige E-Mail.", invalidCredentials: "E-Mail oder Passwort ist falsch.", weakPassword: "Verwende ein Passwort mit mindestens 6 Zeichen.", network: "Verbindung nicht verfügbar. Versuche es gleich erneut.", permissionDenied: "Firestore-Berechtigungen sind nicht konfiguriert.", genericError: "Vorgang fehlgeschlagen. Prüfe Firebase und versuche es erneut." },
+    auth: { name: "Name", email: "E-Mail", password: "Passwort", profile: "Profil", google: "Weiter mit Google", or: "oder", emailExists: "E-Mail ist bereits registriert.", invalidEmail: "Ungültige E-Mail.", invalidCredentials: "E-Mail oder Passwort ist falsch.", weakPassword: "Verwende ein Passwort mit mindestens 6 Zeichen.", network: "Verbindung nicht verfügbar. Versuche es gleich erneut.", permissionDenied: "Firestore-Berechtigungen sind nicht konfiguriert.", popupClosed: "Google-Anmeldung wurde abgebrochen.", unauthorizedDomain: "Diese Domain ist in Firebase noch nicht autorisiert.", accountConflict: "Diese E-Mail ist bereits mit einer anderen Anmeldemethode verknüpft.", genericError: "Vorgang fehlgeschlagen. Prüfe Firebase und versuche es erneut." },
     profile: { privateTitle: "Privates Profil", signedOut: "Erstelle ein Profil, um persönliche Erinnerungen in einem getrennten Bereich zu schreiben.", signedIn: "Profil aktiv", cloudActive: "Private Cloud aktiv", localOnly: "Nur lokal in diesem Browser", cloudExplain: "Deine Erinnerungen werden in deinem Firebase-Nutzerbereich gespeichert.", localExplain: "Ohne Cloud bleiben Erinnerungen nur in diesem Browser.", privateRule: "In der App kann nur dein Konto deine Erinnerungen lesen und schreiben.", writeFreely: "Du kannst Notizen, Daten und persönliche Ereignisse sicherer festhalten.", createProfile: "Profil erstellen", openMemories: "Erinnerung schreiben", memoryCloud: "Privater Bereich: Diese Erinnerung wird in deinem Cloud-Profil gespeichert.", memoryLocal: "Lokaler Bereich: Diese Erinnerung bleibt in diesem Browser, bis du dich anmeldest.", authTrust: "Mit einem Profil werden Erinnerungen in deinem privaten Bereich gespeichert." },
     noYear: "Ohne Datum",
     almanac: "Almanach",
@@ -1708,7 +1778,7 @@ const I18N = {
       new: "Nuevo recuerdo", title: "Título", titlePlaceholder: "Ej. Primer día del proyecto", date: "Fecha", kind: "Etiqueta", detail: "Detalle", detailPlaceholder: "Escribe libremente lo que quieras recordar", repeat: "Recordármelo cada año", save: "Guardar recuerdo", todayList: "Recuerdos de esta fecha", archive: "Archivo personal", delete: "Eliminar", onlyDate: "Solo esta fecha", oneYear: "Hace un año", manyYears: "Hace {count} años", current: "Guardado para este día", future: "Programado",
       kinds: { personale: "Personal", famiglia: "Familia", lavoro: "Trabajo", viaggio: "Viaje", traguardo: "Meta" },
     },
-    auth: { name: "Nombre", email: "Email", password: "Contraseña", profile: "Perfil", emailExists: "Email ya registrado.", invalidEmail: "Email no válido.", invalidCredentials: "Email o contraseña incorrectos.", weakPassword: "Usa una contraseña de al menos 6 caracteres.", network: "Conexión no disponible. Inténtalo de nuevo pronto.", permissionDenied: "Permisos de Firestore no configurados.", genericError: "La operación falló. Revisa Firebase e inténtalo de nuevo." },
+    auth: { name: "Nombre", email: "Email", password: "Contraseña", profile: "Perfil", google: "Continuar con Google", or: "o", emailExists: "Email ya registrado.", invalidEmail: "Email no válido.", invalidCredentials: "Email o contraseña incorrectos.", weakPassword: "Usa una contraseña de al menos 6 caracteres.", network: "Conexión no disponible. Inténtalo de nuevo pronto.", permissionDenied: "Permisos de Firestore no configurados.", popupClosed: "Acceso con Google cancelado.", unauthorizedDomain: "Este dominio aún no está autorizado en Firebase.", accountConflict: "Este correo ya está vinculado a otro método de acceso.", genericError: "La operación falló. Revisa Firebase e inténtalo de nuevo." },
     profile: { privateTitle: "Perfil privado", signedOut: "Crea un perfil para escribir recuerdos personales en un espacio separado.", signedIn: "Perfil activo", cloudActive: "Cloud privado activo", localOnly: "Solo local en este navegador", cloudExplain: "Tus recuerdos se guardan en tu espacio de usuario Firebase.", localExplain: "Sin cloud, los recuerdos quedan solo en este navegador.", privateRule: "En la aplicación, solo tu cuenta puede leer y escribir tus recuerdos.", writeFreely: "Puedes escribir notas, fechas y acontecimientos personales con más tranquilidad.", createProfile: "Crear perfil", openMemories: "Escribir recuerdos", memoryCloud: "Espacio privado: este recuerdo se guardará en tu perfil cloud.", memoryLocal: "Espacio local: este recuerdo queda en este navegador hasta que accedas.", authTrust: "Con un perfil, los recuerdos se guardan en tu espacio privado." },
     noYear: "Sin fecha",
     almanac: "Almanaque",
@@ -2054,6 +2124,8 @@ const elements = {
   nameField: document.querySelector("#nameField"),
   authSubtitle: document.querySelector("#authSubtitle"),
   authTrust: document.querySelector("#authTrust"),
+  googleAuthBlock: document.querySelector("#googleAuthBlock"),
+  authGoogle: document.querySelector("#authGoogle"),
 };
 
 const state = {
@@ -2148,6 +2220,7 @@ function bindEvents() {
   });
   elements.authLoginTab.addEventListener("click", () => setAuthMode("login"));
   elements.authRegisterTab.addEventListener("click", () => setAuthMode("register"));
+  elements.authGoogle.addEventListener("click", handleGoogleSignIn);
   elements.authForm.addEventListener("submit", handleAuthSubmit);
 }
 
@@ -2195,6 +2268,8 @@ function renderStaticText() {
   elements.authClose.title = t("close");
   elements.authClose.setAttribute("aria-label", t("close"));
   elements.authTrust.querySelector("span").textContent = t("profile.authTrust");
+  elements.authGoogle.querySelector("span:last-child").textContent = t("auth.google");
+  elements.googleAuthBlock.querySelector(".auth-divider span").textContent = t("auth.or");
   renderLiveClock();
 
   setTabLabel("overview", "layout-dashboard", t("category.overview"));
@@ -3119,6 +3194,8 @@ async function setupFirebase() {
     state.firebase.api = {
       createUserWithEmailAndPassword: authModule.createUserWithEmailAndPassword,
       signInWithEmailAndPassword: authModule.signInWithEmailAndPassword,
+      signInWithPopup: authModule.signInWithPopup,
+      GoogleAuthProvider: authModule.GoogleAuthProvider,
       signOut: authModule.signOut,
       updateProfile: authModule.updateProfile,
       onAuthStateChanged: authModule.onAuthStateChanged,
@@ -3133,6 +3210,7 @@ async function setupFirebase() {
     };
     state.firebase.ready = true;
     state.firebase.status = "cloud";
+    elements.googleAuthBlock.hidden = false;
 
     state.firebase.api.onAuthStateChanged(state.firebase.auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -3150,6 +3228,7 @@ async function setupFirebase() {
   } catch (error) {
     state.firebase.ready = false;
     state.firebase.status = "local";
+    elements.googleAuthBlock.hidden = true;
     state.users = loadUsers();
     state.currentUser = loadCurrentUser();
   }
@@ -3265,7 +3344,7 @@ async function handleAuthSubmit(event) {
 
       const user = {
         id: makeId("user"),
-      name: name || email.split("@")[0],
+        name: name || email.split("@")[0],
         email,
         passwordHash: await digestPassword(password),
         createdAt: new Date().toISOString(),
@@ -3289,6 +3368,28 @@ async function handleAuthSubmit(event) {
     elements.authMessage.textContent = getFirebaseErrorMessage(error);
   } finally {
     elements.authSubmit.disabled = false;
+  }
+}
+
+async function handleGoogleSignIn() {
+  if (!state.firebase.ready) {
+    elements.authMessage.textContent = t("auth.network");
+    return;
+  }
+
+  elements.authGoogle.disabled = true;
+  elements.authMessage.textContent = "";
+
+  try {
+    const provider = new state.firebase.api.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    const credential = await state.firebase.api.signInWithPopup(state.firebase.auth, provider);
+    await saveFirebaseUserProfile(credential.user);
+    await applyFirebaseUser(credential.user);
+  } catch (error) {
+    elements.authMessage.textContent = getFirebaseErrorMessage(error);
+  } finally {
+    elements.authGoogle.disabled = false;
   }
 }
 
@@ -3506,6 +3607,10 @@ function getFirebaseErrorMessage(error) {
     "auth/invalid-credential": t("auth.invalidCredentials"),
     "auth/weak-password": t("auth.weakPassword"),
     "auth/network-request-failed": t("auth.network"),
+    "auth/popup-closed-by-user": t("auth.popupClosed"),
+    "auth/cancelled-popup-request": t("auth.popupClosed"),
+    "auth/unauthorized-domain": t("auth.unauthorizedDomain"),
+    "auth/account-exists-with-different-credential": t("auth.accountConflict"),
     "permission-denied": t("auth.permissionDenied"),
   };
   return messages[code] || t("auth.genericError");
