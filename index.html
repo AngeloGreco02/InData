@@ -187,6 +187,34 @@ a {
   min-width: 104px;
 }
 
+.live-clock {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.live-clock span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.live-clock strong {
+  min-width: 70px;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
+}
+
+.live-clock svg {
+  color: var(--coral);
+}
+
 .icon-button:hover,
 .text-button:hover,
 .tab:hover,
@@ -314,6 +342,26 @@ a {
   box-shadow: 0 8px 18px rgba(23, 32, 38, 0.08);
 }
 
+.auth-trust,
+.privacy-note {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  color: var(--muted);
+  background: #f3f7f4;
+  border: 1px solid rgba(45, 122, 98, 0.18);
+  border-radius: var(--radius);
+  line-height: 1.4;
+  font-size: 0.88rem;
+}
+
+.auth-trust svg,
+.privacy-note svg {
+  color: var(--green);
+}
+
 .auth-form,
 .memory-form {
   display: grid;
@@ -352,7 +400,7 @@ a {
 
 .form-field textarea {
   resize: vertical;
-  min-height: 108px;
+  min-height: 148px;
   padding: 11px 12px;
   line-height: 1.45;
 }
@@ -598,6 +646,10 @@ a {
   border-top: 4px solid var(--gold);
 }
 
+.privacy-block {
+  border-top: 4px solid var(--blue);
+}
+
 .block-heading,
 .section-title {
   display: flex;
@@ -618,7 +670,8 @@ a {
 .world-days,
 .saved-days,
 .saints-today,
-.memory-today {
+.memory-today,
+.privacy-panel {
   display: grid;
   gap: 10px;
   margin-top: 14px;
@@ -687,6 +740,45 @@ a {
 .memory-chip small {
   color: var(--muted);
   font-weight: 750;
+}
+
+.privacy-status {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: #f5f7fa;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.privacy-status strong {
+  overflow-wrap: anywhere;
+}
+
+.privacy-status small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.privacy-bullets {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.privacy-bullets li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.privacy-bullets svg {
+  color: var(--green);
 }
 
 .metric-grid {
@@ -1032,7 +1124,8 @@ svg {
   }
 
   .date-tools .text-button,
-  .date-tools .language-field {
+  .date-tools .language-field,
+  .date-tools .live-clock {
     grid-column: 1 / -1;
   }
 
@@ -1096,7 +1189,7 @@ svg {
   }
 }
 
-    </style>
+</style>
   </head>
   <body>
     <div class="app-shell">
@@ -1133,6 +1226,11 @@ svg {
             <i data-lucide="sparkles" aria-hidden="true"></i>
             Oggi
           </button>
+          <div class="live-clock" id="liveClock" aria-live="polite">
+            <i data-lucide="radio" aria-hidden="true"></i>
+            <span>Tempo reale</span>
+            <strong>--:--:--</strong>
+          </div>
           <label class="language-field" for="languageSelect">
             <i data-lucide="languages" aria-hidden="true"></i>
             <select id="languageSelect" aria-label="Lingua">
@@ -1251,6 +1349,14 @@ svg {
               </div>
               <div id="memoryToday" class="memory-today"></div>
             </article>
+
+            <article class="insight-block privacy-block">
+              <div class="block-heading">
+                <i data-lucide="shield-check" aria-hidden="true"></i>
+                <h2>Profilo privato</h2>
+              </div>
+              <div id="privacyPanel" class="privacy-panel"></div>
+            </article>
           </section>
 
           <section class="content-panel is-visible" id="cardsPanel" aria-live="polite"></section>
@@ -1283,6 +1389,11 @@ svg {
         <div class="auth-switch" role="tablist" aria-label="Accesso">
           <button class="is-active" id="authLoginTab" type="button">Accedi</button>
           <button id="authRegisterTab" type="button">Registrati</button>
+        </div>
+
+        <div class="auth-trust" id="authTrust">
+          <i data-lucide="shield-check" aria-hidden="true"></i>
+          <span>Con un profilo, i ricordi vengono salvati nel tuo spazio privato.</span>
         </div>
 
         <form class="auth-form" id="authForm">
@@ -1350,6 +1461,7 @@ const I18N = {
     save: "Salva",
     saved: "Salvata",
     source: "Fonte",
+    liveTime: "Tempo reale",
     noData: "Nessun dato disponibile per questa data.",
     loadingDay: "Caricamento della giornata...",
     loading: "Caricamento...",
@@ -1406,7 +1518,7 @@ const I18N = {
       date: "Data",
       kind: "Etichetta",
       detail: "Dettaglio",
-      detailPlaceholder: "Una nota breve da ritrovare fra un anno",
+      detailPlaceholder: "Scrivi liberamente ciò che vuoi ricordare",
       repeat: "Ricordamelo ogni anno",
       save: "Salva ricordo",
       todayList: "Ricordi di questa data",
@@ -1438,6 +1550,22 @@ const I18N = {
       permissionDenied: "Permessi Firestore non configurati.",
       genericError: "Operazione non riuscita. Controlla Firebase e riprova.",
     },
+    profile: {
+      privateTitle: "Profilo privato",
+      signedOut: "Crea un profilo per scrivere ricordi personali in uno spazio separato.",
+      signedIn: "Profilo attivo",
+      cloudActive: "Cloud privato attivo",
+      localOnly: "Solo locale su questo browser",
+      cloudExplain: "I tuoi ricordi sono salvati nel tuo spazio utente Firebase.",
+      localExplain: "Senza cloud, i ricordi restano solo in questo browser.",
+      privateRule: "Nell'app, solo il tuo account può leggere e scrivere i tuoi ricordi.",
+      writeFreely: "Puoi scrivere note, date e accadimenti personali con più tranquillità.",
+      createProfile: "Crea profilo",
+      openMemories: "Scrivi nei ricordi",
+      memoryCloud: "Spazio privato: questo ricordo sarà salvato nel tuo profilo cloud.",
+      memoryLocal: "Spazio locale: questo ricordo resta su questo browser finché non accedi.",
+      authTrust: "Con un profilo, i ricordi vengono salvati nel tuo spazio privato.",
+    },
     noYear: "Senza data",
     almanac: "Almanacco",
   },
@@ -1454,6 +1582,7 @@ const I18N = {
     save: "Enregistrer",
     saved: "Enregistrée",
     source: "Source",
+    liveTime: "Temps réel",
     noData: "Aucune donnée disponible pour cette date.",
     loadingDay: "Chargement de la journée...",
     loading: "Chargement...",
@@ -1468,10 +1597,11 @@ const I18N = {
     metrics: { holidays: "Commémorations", events: "Événements", births: "Naissances", deaths: "Décès" },
     empty: { holidays: "Aucune commémoration trouvée pour cette date.", saints: "Aucun saint ou bienheureux vérifié dans la source pour cette date.", savedDays: "Aucun jour enregistré.", memories: "Aucun souvenir pour cette date.", noResults: "Aucun résultat pour cette sélection.", authGate: "Connectez-vous pour enregistrer vos souvenirs personnels.", archive: "Archive vide." },
     memory: {
-      new: "Nouveau souvenir", title: "Titre", titlePlaceholder: "Ex. Premier jour du projet", date: "Date", kind: "Étiquette", detail: "Détail", detailPlaceholder: "Une courte note à retrouver dans un an", repeat: "Me le rappeler chaque année", save: "Enregistrer le souvenir", todayList: "Souvenirs de cette date", archive: "Archive personnelle", delete: "Supprimer", onlyDate: "Seulement cette date", oneYear: "Il y a un an", manyYears: "Il y a {count} ans", current: "Enregistré pour ce jour", future: "Prévu",
+      new: "Nouveau souvenir", title: "Titre", titlePlaceholder: "Ex. Premier jour du projet", date: "Date", kind: "Étiquette", detail: "Détail", detailPlaceholder: "Écrivez librement ce que vous souhaitez retenir", repeat: "Me le rappeler chaque année", save: "Enregistrer le souvenir", todayList: "Souvenirs de cette date", archive: "Archive personnelle", delete: "Supprimer", onlyDate: "Seulement cette date", oneYear: "Il y a un an", manyYears: "Il y a {count} ans", current: "Enregistré pour ce jour", future: "Prévu",
       kinds: { personale: "Personnel", famiglia: "Famille", lavoro: "Travail", viaggio: "Voyage", traguardo: "Étape importante" },
     },
     auth: { name: "Nom", email: "Email", password: "Mot de passe", profile: "Profil", emailExists: "Email déjà enregistrée.", invalidEmail: "Email non valide.", invalidCredentials: "Email ou mot de passe incorrect.", weakPassword: "Utilisez un mot de passe d’au moins 6 caractères.", network: "Connexion indisponible. Réessayez plus tard.", permissionDenied: "Autorisations Firestore non configurées.", genericError: "Opération échouée. Vérifiez Firebase et réessayez." },
+    profile: { privateTitle: "Profil privé", signedOut: "Créez un profil pour écrire vos souvenirs personnels dans un espace séparé.", signedIn: "Profil actif", cloudActive: "Cloud privé actif", localOnly: "Local uniquement dans ce navigateur", cloudExplain: "Vos souvenirs sont enregistrés dans votre espace utilisateur Firebase.", localExplain: "Sans cloud, vos souvenirs restent seulement dans ce navigateur.", privateRule: "Dans l’application, seul votre compte peut lire et écrire vos souvenirs.", writeFreely: "Vous pouvez écrire notes, dates et événements personnels plus sereinement.", createProfile: "Créer un profil", openMemories: "Écrire un souvenir", memoryCloud: "Espace privé : ce souvenir sera enregistré dans votre profil cloud.", memoryLocal: "Espace local : ce souvenir reste dans ce navigateur jusqu’à votre connexion.", authTrust: "Avec un profil, vos souvenirs sont enregistrés dans votre espace privé." },
     noYear: "Sans date",
     almanac: "Almanach",
   },
@@ -1488,6 +1618,7 @@ const I18N = {
     save: "Save",
     saved: "Saved",
     source: "Source",
+    liveTime: "Live time",
     noData: "No data available for this date.",
     loadingDay: "Loading the day...",
     loading: "Loading...",
@@ -1502,10 +1633,11 @@ const I18N = {
     metrics: { holidays: "Observances", events: "Events", births: "Births", deaths: "Deaths" },
     empty: { holidays: "No observance found for this date.", saints: "No verified saint or blessed found in the source for this date.", savedDays: "No saved days.", memories: "No memories for this date.", noResults: "No results for this selection.", authGate: "Sign in to save your personal memories.", archive: "Archive is empty." },
     memory: {
-      new: "New memory", title: "Title", titlePlaceholder: "Example: First day of the project", date: "Date", kind: "Label", detail: "Details", detailPlaceholder: "A short note to find again next year", repeat: "Remind me every year", save: "Save memory", todayList: "Memories for this date", archive: "Personal archive", delete: "Delete", onlyDate: "Only this date", oneYear: "One year ago", manyYears: "{count} years ago", current: "Saved for this day", future: "Scheduled",
+      new: "New memory", title: "Title", titlePlaceholder: "Example: First day of the project", date: "Date", kind: "Label", detail: "Details", detailPlaceholder: "Write freely what you want to remember", repeat: "Remind me every year", save: "Save memory", todayList: "Memories for this date", archive: "Personal archive", delete: "Delete", onlyDate: "Only this date", oneYear: "One year ago", manyYears: "{count} years ago", current: "Saved for this day", future: "Scheduled",
       kinds: { personale: "Personal", famiglia: "Family", lavoro: "Work", viaggio: "Travel", traguardo: "Milestone" },
     },
     auth: { name: "Name", email: "Email", password: "Password", profile: "Profile", emailExists: "Email already registered.", invalidEmail: "Invalid email.", invalidCredentials: "Email or password is incorrect.", weakPassword: "Use a password of at least 6 characters.", network: "Connection unavailable. Try again shortly.", permissionDenied: "Firestore permissions are not configured.", genericError: "Operation failed. Check Firebase and try again." },
+    profile: { privateTitle: "Private profile", signedOut: "Create a profile to write personal memories in a separate space.", signedIn: "Active profile", cloudActive: "Private cloud active", localOnly: "Local only in this browser", cloudExplain: "Your memories are saved in your Firebase user space.", localExplain: "Without cloud, memories stay only in this browser.", privateRule: "In the app, only your account can read and write your memories.", writeFreely: "You can write notes, dates and personal events with more confidence.", createProfile: "Create profile", openMemories: "Write memories", memoryCloud: "Private space: this memory will be saved in your cloud profile.", memoryLocal: "Local space: this memory stays in this browser until you sign in.", authTrust: "With a profile, memories are saved in your private space." },
     noYear: "No year",
     almanac: "Almanac",
   },
@@ -1522,6 +1654,7 @@ const I18N = {
     save: "Speichern",
     saved: "Gespeichert",
     source: "Quelle",
+    liveTime: "Echtzeit",
     noData: "Für dieses Datum sind keine Daten verfügbar.",
     loadingDay: "Tag wird geladen...",
     loading: "Laden...",
@@ -1536,10 +1669,11 @@ const I18N = {
     metrics: { holidays: "Gedenktage", events: "Ereignisse", births: "Geburten", deaths: "Todesfälle" },
     empty: { holidays: "Kein Gedenktag für dieses Datum gefunden.", saints: "Keine verifizierte Angabe zu Heiligen oder Seligen in der Quelle für dieses Datum gefunden.", savedDays: "Keine gespeicherten Tage.", memories: "Keine Erinnerungen für dieses Datum.", noResults: "Keine Ergebnisse für diese Auswahl.", authGate: "Melde dich an, um persönliche Erinnerungen zu speichern.", archive: "Archiv ist leer." },
     memory: {
-      new: "Neue Erinnerung", title: "Titel", titlePlaceholder: "Z. B. Erster Projekttag", date: "Datum", kind: "Label", detail: "Details", detailPlaceholder: "Eine kurze Notiz für nächstes Jahr", repeat: "Jedes Jahr erinnern", save: "Erinnerung speichern", todayList: "Erinnerungen für dieses Datum", archive: "Persönliches Archiv", delete: "Löschen", onlyDate: "Nur dieses Datum", oneYear: "Vor einem Jahr", manyYears: "Vor {count} Jahren", current: "Für diesen Tag gespeichert", future: "Geplant",
+      new: "Neue Erinnerung", title: "Titel", titlePlaceholder: "Z. B. Erster Projekttag", date: "Datum", kind: "Label", detail: "Details", detailPlaceholder: "Schreibe frei, was du festhalten möchtest", repeat: "Jedes Jahr erinnern", save: "Erinnerung speichern", todayList: "Erinnerungen für dieses Datum", archive: "Persönliches Archiv", delete: "Löschen", onlyDate: "Nur dieses Datum", oneYear: "Vor einem Jahr", manyYears: "Vor {count} Jahren", current: "Für diesen Tag gespeichert", future: "Geplant",
       kinds: { personale: "Persönlich", famiglia: "Familie", lavoro: "Arbeit", viaggio: "Reise", traguardo: "Meilenstein" },
     },
     auth: { name: "Name", email: "E-Mail", password: "Passwort", profile: "Profil", emailExists: "E-Mail ist bereits registriert.", invalidEmail: "Ungültige E-Mail.", invalidCredentials: "E-Mail oder Passwort ist falsch.", weakPassword: "Verwende ein Passwort mit mindestens 6 Zeichen.", network: "Verbindung nicht verfügbar. Versuche es gleich erneut.", permissionDenied: "Firestore-Berechtigungen sind nicht konfiguriert.", genericError: "Vorgang fehlgeschlagen. Prüfe Firebase und versuche es erneut." },
+    profile: { privateTitle: "Privates Profil", signedOut: "Erstelle ein Profil, um persönliche Erinnerungen in einem getrennten Bereich zu schreiben.", signedIn: "Profil aktiv", cloudActive: "Private Cloud aktiv", localOnly: "Nur lokal in diesem Browser", cloudExplain: "Deine Erinnerungen werden in deinem Firebase-Nutzerbereich gespeichert.", localExplain: "Ohne Cloud bleiben Erinnerungen nur in diesem Browser.", privateRule: "In der App kann nur dein Konto deine Erinnerungen lesen und schreiben.", writeFreely: "Du kannst Notizen, Daten und persönliche Ereignisse sicherer festhalten.", createProfile: "Profil erstellen", openMemories: "Erinnerung schreiben", memoryCloud: "Privater Bereich: Diese Erinnerung wird in deinem Cloud-Profil gespeichert.", memoryLocal: "Lokaler Bereich: Diese Erinnerung bleibt in diesem Browser, bis du dich anmeldest.", authTrust: "Mit einem Profil werden Erinnerungen in deinem privaten Bereich gespeichert." },
     noYear: "Ohne Datum",
     almanac: "Almanach",
   },
@@ -1556,6 +1690,7 @@ const I18N = {
     save: "Guardar",
     saved: "Guardado",
     source: "Fuente",
+    liveTime: "Tiempo real",
     noData: "No hay datos disponibles para esta fecha.",
     loadingDay: "Cargando el día...",
     loading: "Cargando...",
@@ -1570,10 +1705,11 @@ const I18N = {
     metrics: { holidays: "Conmemoraciones", events: "Eventos", births: "Nacimientos", deaths: "Fallecimientos" },
     empty: { holidays: "No se encontró ninguna conmemoración para esta fecha.", saints: "No se encontró ningún santo o beato verificado en la fuente para esta fecha.", savedDays: "No hay días guardados.", memories: "No hay recuerdos para esta fecha.", noResults: "No hay resultados para esta selección.", authGate: "Accede para guardar tus recuerdos personales.", archive: "Archivo vacío." },
     memory: {
-      new: "Nuevo recuerdo", title: "Título", titlePlaceholder: "Ej. Primer día del proyecto", date: "Fecha", kind: "Etiqueta", detail: "Detalle", detailPlaceholder: "Una nota breve para encontrar dentro de un año", repeat: "Recordármelo cada año", save: "Guardar recuerdo", todayList: "Recuerdos de esta fecha", archive: "Archivo personal", delete: "Eliminar", onlyDate: "Solo esta fecha", oneYear: "Hace un año", manyYears: "Hace {count} años", current: "Guardado para este día", future: "Programado",
+      new: "Nuevo recuerdo", title: "Título", titlePlaceholder: "Ej. Primer día del proyecto", date: "Fecha", kind: "Etiqueta", detail: "Detalle", detailPlaceholder: "Escribe libremente lo que quieras recordar", repeat: "Recordármelo cada año", save: "Guardar recuerdo", todayList: "Recuerdos de esta fecha", archive: "Archivo personal", delete: "Eliminar", onlyDate: "Solo esta fecha", oneYear: "Hace un año", manyYears: "Hace {count} años", current: "Guardado para este día", future: "Programado",
       kinds: { personale: "Personal", famiglia: "Familia", lavoro: "Trabajo", viaggio: "Viaje", traguardo: "Meta" },
     },
     auth: { name: "Nombre", email: "Email", password: "Contraseña", profile: "Perfil", emailExists: "Email ya registrado.", invalidEmail: "Email no válido.", invalidCredentials: "Email o contraseña incorrectos.", weakPassword: "Usa una contraseña de al menos 6 caracteres.", network: "Conexión no disponible. Inténtalo de nuevo pronto.", permissionDenied: "Permisos de Firestore no configurados.", genericError: "La operación falló. Revisa Firebase e inténtalo de nuevo." },
+    profile: { privateTitle: "Perfil privado", signedOut: "Crea un perfil para escribir recuerdos personales en un espacio separado.", signedIn: "Perfil activo", cloudActive: "Cloud privado activo", localOnly: "Solo local en este navegador", cloudExplain: "Tus recuerdos se guardan en tu espacio de usuario Firebase.", localExplain: "Sin cloud, los recuerdos quedan solo en este navegador.", privateRule: "En la aplicación, solo tu cuenta puede leer y escribir tus recuerdos.", writeFreely: "Puedes escribir notas, fechas y acontecimientos personales con más tranquilidad.", createProfile: "Crear perfil", openMemories: "Escribir recuerdos", memoryCloud: "Espacio privado: este recuerdo se guardará en tu perfil cloud.", memoryLocal: "Espacio local: este recuerdo queda en este navegador hasta que accedas.", authTrust: "Con un perfil, los recuerdos se guardan en tu espacio privado." },
     noYear: "Sin fecha",
     almanac: "Almanaque",
   },
@@ -1882,6 +2018,7 @@ const elements = {
   previousDay: document.querySelector("#previousDay"),
   nextDay: document.querySelector("#nextDay"),
   todayButton: document.querySelector("#todayButton"),
+  liveClock: document.querySelector("#liveClock"),
   languageSelect: document.querySelector("#languageSelect"),
   accountButton: document.querySelector("#accountButton"),
   brandTagline: document.querySelector("#brandTagline"),
@@ -1899,6 +2036,7 @@ const elements = {
   worldDays: document.querySelector("#worldDays"),
   saintsToday: document.querySelector("#saintsToday"),
   memoryToday: document.querySelector("#memoryToday"),
+  privacyPanel: document.querySelector("#privacyPanel"),
   cardsPanel: document.querySelector("#cardsPanel"),
   overviewPanel: document.querySelector("#overviewPanel"),
   tabs: [...document.querySelectorAll(".tab")],
@@ -1915,6 +2053,7 @@ const elements = {
   authSubmit: document.querySelector("#authSubmit"),
   nameField: document.querySelector("#nameField"),
   authSubtitle: document.querySelector("#authSubtitle"),
+  authTrust: document.querySelector("#authTrust"),
 };
 
 const state = {
@@ -1937,6 +2076,7 @@ const state = {
     api: null,
   },
   requestId: 0,
+  clockTimer: null,
 };
 
 async function init() {
@@ -1953,6 +2093,8 @@ async function init() {
   renderAccount();
   renderSavedDays();
   renderMemoryToday();
+  renderPrivacyPanel();
+  startLiveClock();
   loadDay(state.date);
   paintIcons();
 }
@@ -2052,6 +2194,8 @@ function renderStaticText() {
   elements.searchInput.placeholder = t("searchPlaceholder");
   elements.authClose.title = t("close");
   elements.authClose.setAttribute("aria-label", t("close"));
+  elements.authTrust.querySelector("span").textContent = t("profile.authTrust");
+  renderLiveClock();
 
   setTabLabel("overview", "layout-dashboard", t("category.overview"));
   setTabLabel("holidays", "globe-2", t("category.holidays"));
@@ -2066,6 +2210,7 @@ function renderStaticText() {
   document.querySelector(".saint-block h2").textContent = t("blocks.saintOfDay");
   document.querySelector(".saved-block h2").textContent = t("blocks.savedDays");
   document.querySelector(".memory-block h2").textContent = t("blocks.personalMemories");
+  document.querySelector(".privacy-block h2").textContent = t("profile.privateTitle");
 
   elements.authLoginTab.textContent = t("signIn");
   elements.authRegisterTab.textContent = t("register");
@@ -2075,6 +2220,37 @@ function renderStaticText() {
   setAuthMode(state.authMode);
   updateSaveButton();
   renderAccount();
+  renderPrivacyPanel();
+  paintIcons();
+}
+
+function startLiveClock() {
+  if (state.clockTimer) window.clearInterval(state.clockTimer);
+  renderLiveClock();
+  state.clockTimer = window.setInterval(renderLiveClock, 1000);
+}
+
+function renderLiveClock() {
+  if (!elements.liveClock) return;
+  const now = new Date();
+  const time = new Intl.DateTimeFormat(currentLocale(), {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(now);
+  const label = elements.liveClock.querySelector("span");
+  const value = elements.liveClock.querySelector("strong");
+  if (label && value) {
+    label.textContent = t("liveTime");
+    value.textContent = time;
+    return;
+  }
+
+  elements.liveClock.innerHTML = `
+    <i data-lucide="radio" aria-hidden="true"></i>
+    <span>${t("liveTime")}</span>
+    <strong>${escapeHtml(time)}</strong>
+  `;
   paintIcons();
 }
 
@@ -2304,6 +2480,7 @@ function renderAll(flags = {}) {
   renderWorldDays();
   renderSaintsToday();
   renderMemoryToday();
+  renderPrivacyPanel();
   renderPanels();
   renderSavedDays();
   updateSaveButton();
@@ -2462,7 +2639,13 @@ function renderMemoryToday() {
 
   const matches = getMemoriesForDate(state.date).slice(0, 3);
   if (!matches.length) {
-    elements.memoryToday.innerHTML = `<p class="empty-copy">${t("empty.memories")}</p>`;
+    elements.memoryToday.innerHTML = `
+      <button class="memory-chip" type="button" data-open-memories>
+        <span>${t("profile.openMemories")}</span>
+        <small>${t("profile.writeFreely")}</small>
+      </button>
+    `;
+    bindMemoryShortcutButtons();
     return;
   }
 
@@ -2477,6 +2660,34 @@ function renderMemoryToday() {
   bindMemoryShortcutButtons();
 }
 
+function renderPrivacyPanel() {
+  if (!elements.privacyPanel) return;
+
+  const isCloud = state.firebase.ready && state.currentUser?.provider === "firebase";
+  const status = isCloud ? t("profile.cloudActive") : t("profile.localOnly");
+  const explanation = isCloud ? t("profile.cloudExplain") : t("profile.localExplain");
+  const title = state.currentUser
+    ? `${t("profile.signedIn")}: ${state.currentUser.name || state.currentUser.email || t("auth.profile")}`
+    : t("profile.signedOut");
+  const action = state.currentUser
+    ? `<button class="text-button subtle" type="button" data-open-memories><i data-lucide="heart-plus" aria-hidden="true"></i>${t("profile.openMemories")}</button>`
+    : `<button class="text-button primary-action" type="button" data-auth-open data-auth-mode="register"><i data-lucide="user-plus" aria-hidden="true"></i>${t("profile.createProfile")}</button>`;
+
+  elements.privacyPanel.innerHTML = `
+    <div class="privacy-status">
+      <strong>${escapeHtml(title)}</strong>
+      <small>${escapeHtml(status)} - ${escapeHtml(explanation)}</small>
+    </div>
+    <ul class="privacy-bullets">
+      <li><i data-lucide="lock-keyhole" aria-hidden="true"></i><span>${escapeHtml(t("profile.privateRule"))}</span></li>
+      <li><i data-lucide="pen-line" aria-hidden="true"></i><span>${escapeHtml(t("profile.writeFreely"))}</span></li>
+    </ul>
+    ${action}
+  `;
+  bindMemoryShortcutButtons();
+  paintIcons();
+}
+
 function renderMemoryWorkspace() {
   if (!state.currentUser) {
     elements.cardsPanel.innerHTML = `
@@ -2484,6 +2695,7 @@ function renderMemoryWorkspace() {
         <div class="empty-state">
           <i data-lucide="heart" aria-hidden="true"></i>
           <p>${t("empty.authGate")}</p>
+          <p>${t("profile.signedOut")}</p>
           <button class="text-button primary-action" type="button" data-auth-open>
             <i data-lucide="log-in" aria-hidden="true"></i>
             ${t("signIn")}
@@ -2506,6 +2718,7 @@ function renderMemoryWorkspace() {
           <i data-lucide="heart-plus" aria-hidden="true"></i>
           <h2>${t("memory.new")}</h2>
         </div>
+        ${renderMemoryPrivacyNote()}
         <label class="form-field">
           <span>${t("memory.title")}</span>
           <input id="memoryTitle" type="text" maxlength="90" required placeholder="${escapeAttribute(t("memory.titlePlaceholder"))}" />
@@ -2526,7 +2739,7 @@ function renderMemoryWorkspace() {
         </label>
         <label class="form-field">
           <span>${t("memory.detail")}</span>
-          <textarea id="memoryNotes" rows="4" maxlength="420" placeholder="${escapeAttribute(t("memory.detailPlaceholder"))}"></textarea>
+          <textarea id="memoryNotes" rows="7" maxlength="2000" placeholder="${escapeAttribute(t("memory.detailPlaceholder"))}"></textarea>
         </label>
         <label class="check-field">
           <input id="memoryRepeat" type="checkbox" checked />
@@ -2547,6 +2760,18 @@ function renderMemoryWorkspace() {
 
   bindMemoryForm();
   paintIcons();
+}
+
+function renderMemoryPrivacyNote() {
+  const copy = state.firebase.ready && state.currentUser?.provider === "firebase"
+    ? t("profile.memoryCloud")
+    : t("profile.memoryLocal");
+  return `
+    <div class="privacy-note">
+      <i data-lucide="shield-check" aria-hidden="true"></i>
+      <span>${escapeHtml(copy)}</span>
+    </div>
+  `;
 }
 
 function renderMemoryCollection(title, memories, emptyText) {
@@ -2625,10 +2850,12 @@ function bindMemoryForm() {
 }
 
 function bindMemoryShortcutButtons() {
-  document.querySelectorAll("[data-auth-open]").forEach((button) => {
-    button.addEventListener("click", () => openAuth("login"));
+  document.querySelectorAll("[data-auth-open]:not([data-shortcut-bound])").forEach((button) => {
+    button.dataset.shortcutBound = "true";
+    button.addEventListener("click", () => openAuth(button.dataset.authMode || "login"));
   });
-  document.querySelectorAll("[data-open-memories]").forEach((button) => {
+  document.querySelectorAll("[data-open-memories]:not([data-shortcut-bound])").forEach((button) => {
+    button.dataset.shortcutBound = "true";
     button.addEventListener("click", () => setActiveTab("memories"));
   });
 }
@@ -2917,6 +3144,7 @@ async function setupFirebase() {
       state.memories = [];
       renderAccount();
       renderMemoryToday();
+      renderPrivacyPanel();
       renderPanels();
     });
   } catch (error) {
@@ -2938,6 +3166,7 @@ async function applyFirebaseUser(firebaseUser, fallbackName = "") {
   closeAuth();
   renderAccount();
   renderMemoryToday();
+  renderPrivacyPanel();
   renderPanels();
 }
 
@@ -3070,6 +3299,7 @@ function setCurrentUser(user) {
   closeAuth();
   renderAccount();
   renderMemoryToday();
+  renderPrivacyPanel();
   renderPanels();
 }
 
@@ -3084,6 +3314,7 @@ async function signOut() {
   saveCurrentUser("");
   renderAccount();
   renderMemoryToday();
+  renderPrivacyPanel();
   renderPanels();
 }
 
@@ -3336,6 +3567,6 @@ function paintIcons() {
 
 init();
 
-    </script>
+</script>
   </body>
 </html>
