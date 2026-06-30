@@ -16,7 +16,7 @@
   --line: #dfe5ea;
   --shadow: 0 18px 48px rgba(23, 32, 38, 0.10);
   --green: #2d7a62;
-  --coral: #d65f49;
+  --coral: #b63d2f;
   --blue: #2f68b8;
   --gold: #b7791f;
   --violet: #6b5aa6;
@@ -64,6 +64,48 @@ button:disabled {
 
 a {
   color: inherit;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  padding: 12px 16px;
+  color: #fff;
+  background: var(--ink);
+  border-radius: var(--radius);
+  font-weight: 850;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:focus-visible {
+  outline: 3px solid #1769c2;
+  outline-offset: 3px;
+}
+
+main:focus {
+  outline: 0;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 .app-shell {
@@ -246,7 +288,6 @@ a {
   width: 100%;
   min-width: 0;
   border: 0;
-  outline: 0;
   background: transparent;
   color: var(--ink);
 }
@@ -283,12 +324,14 @@ a {
   position: relative;
   display: grid;
   width: min(440px, 100%);
+  max-height: calc(100vh - 40px);
   gap: 18px;
   padding: 24px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  overflow-y: auto;
 }
 
 .modal-close {
@@ -340,6 +383,11 @@ a {
   color: var(--ink);
   background: var(--surface);
   box-shadow: 0 8px 18px rgba(23, 32, 38, 0.08);
+}
+
+.auth-panel {
+  display: grid;
+  gap: 18px;
 }
 
 .auth-trust,
@@ -444,7 +492,6 @@ a {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  outline: 0;
   background: #fff;
   color: var(--ink);
 }
@@ -480,6 +527,21 @@ a {
   color: var(--coral);
   font-size: 0.85rem;
   font-weight: 750;
+}
+
+[aria-invalid="true"] {
+  border-color: var(--coral) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .day-hero {
@@ -1249,7 +1311,8 @@ svg {
 </style>
   </head>
   <body>
-    <div class="app-shell">
+    <a class="skip-link" id="skipLink" href="#mainContent">Vai al contenuto principale</a>
+    <div class="app-shell" id="appShell">
       <header class="topbar" aria-label="Barra principale">
         <a class="brand" href="./index.html" aria-label="InData">
           <span class="brand-mark" aria-hidden="true">
@@ -1274,6 +1337,7 @@ svg {
           </button>
           <label class="date-field" for="datePicker">
             <i data-lucide="calendar-days" aria-hidden="true"></i>
+            <span class="visually-hidden" id="dateLabel">Data</span>
             <input id="datePicker" type="date" />
           </label>
           <button class="icon-button" id="nextDay" type="button" title="Giorno successivo" aria-label="Giorno successivo">
@@ -1283,7 +1347,7 @@ svg {
             <i data-lucide="sparkles" aria-hidden="true"></i>
             Oggi
           </button>
-          <div class="live-clock" id="liveClock" aria-live="polite">
+          <div class="live-clock" id="liveClock" role="timer" aria-live="off" aria-label="Tempo reale">
             <i data-lucide="radio" aria-hidden="true"></i>
             <span>Tempo reale</span>
             <strong>--:--:--</strong>
@@ -1305,7 +1369,7 @@ svg {
         </div>
       </header>
 
-      <main>
+      <main id="mainContent" tabindex="-1">
         <section class="day-hero" aria-labelledby="dayTitle">
           <div class="hero-media" id="heroMedia" aria-hidden="true"></div>
           <div class="hero-copy">
@@ -1315,7 +1379,7 @@ svg {
           </div>
           <aside class="source-panel" aria-label="Stato dei dati">
             <span id="sourceState">Connessione alla fonte</span>
-            <a id="sourceLink" href="https://www.mediawiki.org/wiki/Wikimedia_APIs" target="_blank" rel="noreferrer">Wikimedia</a>
+            <a id="sourceLink" href="https://www.mediawiki.org/wiki/Wikimedia_APIs" target="_blank" rel="noopener noreferrer">Wikimedia</a>
           </aside>
         </section>
 
@@ -1325,31 +1389,31 @@ svg {
 
         <section class="dashboard" aria-label="Almanacco">
           <nav class="category-tabs" aria-label="Categorie">
-            <button class="tab is-active" type="button" data-tab="overview">
+            <button class="tab is-active" type="button" data-tab="overview" aria-pressed="true">
               <i data-lucide="layout-dashboard" aria-hidden="true"></i>
               Sintesi
             </button>
-            <button class="tab" type="button" data-tab="holidays">
+            <button class="tab" type="button" data-tab="holidays" aria-pressed="false">
               <i data-lucide="globe-2" aria-hidden="true"></i>
               Giornate
             </button>
-            <button class="tab" type="button" data-tab="saints">
+            <button class="tab" type="button" data-tab="saints" aria-pressed="false">
               <i data-lucide="church" aria-hidden="true"></i>
               Santi
             </button>
-            <button class="tab" type="button" data-tab="events">
+            <button class="tab" type="button" data-tab="events" aria-pressed="false">
               <i data-lucide="landmark" aria-hidden="true"></i>
               Storia
             </button>
-            <button class="tab" type="button" data-tab="births">
+            <button class="tab" type="button" data-tab="births" aria-pressed="false">
               <i data-lucide="cake" aria-hidden="true"></i>
               Nati
             </button>
-            <button class="tab" type="button" data-tab="deaths">
+            <button class="tab" type="button" data-tab="deaths" aria-pressed="false">
               <i data-lucide="flower-2" aria-hidden="true"></i>
               Morti
             </button>
-            <button class="tab" type="button" data-tab="memories">
+            <button class="tab" type="button" data-tab="memories" aria-pressed="false">
               <i data-lucide="heart" aria-hidden="true"></i>
               Ricordi
             </button>
@@ -1358,6 +1422,7 @@ svg {
           <div class="controls-row">
             <label class="search-field" for="searchInput">
               <i data-lucide="search" aria-hidden="true"></i>
+              <span class="visually-hidden" id="searchLabel">Cerca nella giornata</span>
               <input id="searchInput" type="search" placeholder="Cerca nella giornata" autocomplete="off" />
             </label>
             <button class="text-button subtle" id="saveDay" type="button">
@@ -1416,13 +1481,14 @@ svg {
             </article>
           </section>
 
-          <section class="content-panel is-visible" id="cardsPanel" aria-live="polite"></section>
+          <p class="visually-hidden" id="pageStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+          <section class="content-panel is-visible" id="cardsPanel" aria-label="Contenuto selezionato" aria-busy="false"></section>
         </section>
       </main>
     </div>
 
     <div class="modal-layer" id="authModal" hidden>
-      <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle" aria-describedby="authSubtitle">
         <button class="icon-button modal-close" id="authClose" type="button" title="Chiudi" aria-label="Chiudi">
           <i data-lucide="x"></i>
         </button>
@@ -1444,42 +1510,44 @@ svg {
         </div>
 
         <div class="auth-switch" role="tablist" aria-label="Accesso">
-          <button class="is-active" id="authLoginTab" type="button">Accedi</button>
-          <button id="authRegisterTab" type="button">Registrati</button>
+          <button class="is-active" id="authLoginTab" type="button" role="tab" aria-selected="true" aria-controls="authPanel">Accedi</button>
+          <button id="authRegisterTab" type="button" role="tab" aria-selected="false" aria-controls="authPanel" tabindex="-1">Registrati</button>
         </div>
 
-        <div class="auth-trust" id="authTrust">
-          <i data-lucide="shield-check" aria-hidden="true"></i>
-          <span>Con un profilo, i ricordi vengono salvati nel tuo spazio privato.</span>
-        </div>
+        <div class="auth-panel" id="authPanel" role="tabpanel" aria-labelledby="authLoginTab">
+          <div class="auth-trust" id="authTrust">
+            <i data-lucide="shield-check" aria-hidden="true"></i>
+            <span>Con un profilo, i ricordi vengono salvati nel tuo spazio privato.</span>
+          </div>
 
-        <div class="google-auth" id="googleAuthBlock" hidden>
-          <button class="google-auth-button" id="authGoogle" type="button">
-            <span class="google-mark" aria-hidden="true">G</span>
-            <span>Continua con Google</span>
-          </button>
-          <div class="auth-divider"><span>oppure</span></div>
-        </div>
+          <div class="google-auth" id="googleAuthBlock" hidden>
+            <button class="google-auth-button" id="authGoogle" type="button">
+              <span class="google-mark" aria-hidden="true">G</span>
+              <span>Continua con Google</span>
+            </button>
+            <div class="auth-divider"><span>oppure</span></div>
+          </div>
 
-        <form class="auth-form" id="authForm">
-          <label class="form-field" id="nameField">
-            <span>Nome</span>
-            <input id="authName" type="text" autocomplete="name" />
-          </label>
-          <label class="form-field">
-            <span>Email</span>
-            <input id="authEmail" type="email" autocomplete="email" required />
-          </label>
-          <label class="form-field">
-            <span>Password</span>
-            <input id="authPassword" type="password" autocomplete="current-password" required minlength="6" />
-          </label>
-          <p class="form-message" id="authMessage" role="status"></p>
-          <button class="text-button primary-action" id="authSubmit" type="submit">
-            <i data-lucide="log-in" aria-hidden="true"></i>
-            Accedi
-          </button>
-        </form>
+          <form class="auth-form" id="authForm">
+            <label class="form-field" id="nameField">
+              <span>Nome</span>
+              <input id="authName" type="text" autocomplete="name" aria-describedby="authMessage" />
+            </label>
+            <label class="form-field">
+              <span>Email</span>
+              <input id="authEmail" type="email" autocomplete="email" required aria-describedby="authMessage" />
+            </label>
+            <label class="form-field">
+              <span>Password</span>
+              <input id="authPassword" type="password" autocomplete="current-password" required minlength="6" aria-describedby="authMessage" />
+            </label>
+            <p class="form-message" id="authMessage" role="alert" aria-live="assertive" aria-atomic="true"></p>
+            <button class="text-button primary-action" id="authSubmit" type="submit">
+              <i data-lucide="log-in" aria-hidden="true"></i>
+              Accedi
+            </button>
+          </form>
+        </div>
       </section>
     </div>
 
@@ -1493,7 +1561,7 @@ svg {
           </div>
           <h3></h3>
           <p></p>
-          <a class="card-link" target="_blank" rel="noreferrer">
+          <a class="card-link" target="_blank" rel="noopener noreferrer">
             Fonte
             <i data-lucide="external-link" aria-hidden="true"></i>
           </a>
@@ -1520,6 +1588,9 @@ const I18N = {
     signOut: "Esci",
     register: "Registrati",
     close: "Chiudi",
+    skipContent: "Vai al contenuto principale",
+    resultsReady: "Contenuti aggiornati",
+    newWindow: "si apre in una nuova scheda",
     previousDay: "Giorno precedente",
     nextDay: "Giorno successivo",
     searchPlaceholder: "Cerca nella giornata",
@@ -1646,6 +1717,9 @@ const I18N = {
     signOut: "Déconnexion",
     register: "Inscription",
     close: "Fermer",
+    skipContent: "Aller au contenu principal",
+    resultsReady: "Contenu mis à jour",
+    newWindow: "s’ouvre dans un nouvel onglet",
     previousDay: "Jour précédent",
     nextDay: "Jour suivant",
     searchPlaceholder: "Rechercher dans la journée",
@@ -1682,6 +1756,9 @@ const I18N = {
     signOut: "Sign out",
     register: "Register",
     close: "Close",
+    skipContent: "Skip to main content",
+    resultsReady: "Content updated",
+    newWindow: "opens in a new tab",
     previousDay: "Previous day",
     nextDay: "Next day",
     searchPlaceholder: "Search this day",
@@ -1718,6 +1795,9 @@ const I18N = {
     signOut: "Abmelden",
     register: "Registrieren",
     close: "Schließen",
+    skipContent: "Zum Hauptinhalt springen",
+    resultsReady: "Inhalt aktualisiert",
+    newWindow: "wird in einem neuen Tab geöffnet",
     previousDay: "Vorheriger Tag",
     nextDay: "Nächster Tag",
     searchPlaceholder: "Diesen Tag durchsuchen",
@@ -1754,6 +1834,9 @@ const I18N = {
     signOut: "Salir",
     register: "Registrarse",
     close: "Cerrar",
+    skipContent: "Ir al contenido principal",
+    resultsReady: "Contenido actualizado",
+    newWindow: "se abre en una pestaña nueva",
     previousDay: "Día anterior",
     nextDay: "Día siguiente",
     searchPlaceholder: "Buscar en el día",
@@ -2084,6 +2167,10 @@ const FALLBACK_DATA = {
 };
 
 const elements = {
+  appShell: document.querySelector("#appShell"),
+  mainContent: document.querySelector("#mainContent"),
+  skipLink: document.querySelector("#skipLink"),
+  dateLabel: document.querySelector("#dateLabel"),
   datePicker: document.querySelector("#datePicker"),
   previousDay: document.querySelector("#previousDay"),
   nextDay: document.querySelector("#nextDay"),
@@ -2100,6 +2187,7 @@ const elements = {
   sourceLink: document.querySelector("#sourceLink"),
   dayRail: document.querySelector("#dayRail"),
   searchInput: document.querySelector("#searchInput"),
+  searchLabel: document.querySelector("#searchLabel"),
   saveDay: document.querySelector("#saveDay"),
   savedDays: document.querySelector("#savedDays"),
   metrics: document.querySelector("#metrics"),
@@ -2108,6 +2196,7 @@ const elements = {
   memoryToday: document.querySelector("#memoryToday"),
   privacyPanel: document.querySelector("#privacyPanel"),
   cardsPanel: document.querySelector("#cardsPanel"),
+  pageStatus: document.querySelector("#pageStatus"),
   overviewPanel: document.querySelector("#overviewPanel"),
   tabs: [...document.querySelectorAll(".tab")],
   cardTemplate: document.querySelector("#cardTemplate"),
@@ -2126,6 +2215,7 @@ const elements = {
   authTrust: document.querySelector("#authTrust"),
   googleAuthBlock: document.querySelector("#googleAuthBlock"),
   authGoogle: document.querySelector("#authGoogle"),
+  authPanel: document.querySelector("#authPanel"),
 };
 
 const state = {
@@ -2149,6 +2239,7 @@ const state = {
   },
   requestId: 0,
   clockTimer: null,
+  lastFocusedElement: null,
 };
 
 async function init() {
@@ -2220,8 +2311,14 @@ function bindEvents() {
   });
   elements.authLoginTab.addEventListener("click", () => setAuthMode("login"));
   elements.authRegisterTab.addEventListener("click", () => setAuthMode("register"));
+  elements.authLoginTab.addEventListener("keydown", handleAuthTabKeydown);
+  elements.authRegisterTab.addEventListener("keydown", handleAuthTabKeydown);
   elements.authGoogle.addEventListener("click", handleGoogleSignIn);
   elements.authForm.addEventListener("submit", handleAuthSubmit);
+  [elements.authName, elements.authEmail, elements.authPassword].forEach((field) => {
+    field.addEventListener("input", clearAuthError);
+  });
+  document.addEventListener("keydown", handleDocumentKeydown);
 }
 
 function shiftDate(offset) {
@@ -2256,6 +2353,9 @@ function setLanguage(language) {
 }
 
 function renderStaticText() {
+  elements.skipLink.textContent = t("skipContent");
+  elements.dateLabel.textContent = t("memory.date");
+  elements.searchLabel.textContent = t("searchPlaceholder");
   elements.brandTagline.textContent = t("tagline");
   elements.authSubtitle.textContent = t("tagline");
   elements.todayButton.innerHTML = `<i data-lucide="sparkles" aria-hidden="true"></i> ${t("today")}`;
@@ -2265,6 +2365,7 @@ function renderStaticText() {
   elements.nextDay.setAttribute("aria-label", t("nextDay"));
   elements.languageSelect.setAttribute("aria-label", languageName(state.language));
   elements.searchInput.placeholder = t("searchPlaceholder");
+  elements.sourceLink.setAttribute("aria-label", `${t("source")}: Wikimedia, ${t("newWindow")}`);
   elements.authClose.title = t("close");
   elements.authClose.setAttribute("aria-label", t("close"));
   elements.authTrust.querySelector("span").textContent = t("profile.authTrust");
@@ -2318,6 +2419,7 @@ function renderLiveClock() {
   if (label && value) {
     label.textContent = t("liveTime");
     value.textContent = time;
+    elements.liveClock.setAttribute("aria-label", `${t("liveTime")}: ${time}`);
     return;
   }
 
@@ -2326,6 +2428,7 @@ function renderLiveClock() {
     <span>${t("liveTime")}</span>
     <strong>${escapeHtml(time)}</strong>
   `;
+  elements.liveClock.setAttribute("aria-label", `${t("liveTime")}: ${time}`);
   paintIcons();
 }
 
@@ -2559,6 +2662,8 @@ function renderAll(flags = {}) {
   renderPanels();
   renderSavedDays();
   updateSaveButton();
+  elements.cardsPanel.setAttribute("aria-busy", "false");
+  elements.pageStatus.textContent = `${t("resultsReady")}: ${formatDayTitle(state.date)}`;
   paintIcons();
 }
 
@@ -2880,7 +2985,7 @@ function renderMemoryCard(memory) {
         ${note}
         <small>${escapeHtml(label)} - ${escapeHtml(getMemoryAgeLabel(memory, state.date))}</small>
       </div>
-      <button class="icon-button memory-delete" type="button" title="${escapeAttribute(t("memory.delete"))}" aria-label="${escapeAttribute(t("memory.delete"))}" data-memory-id="${escapeAttribute(memory.id)}">
+      <button class="icon-button memory-delete" type="button" title="${escapeAttribute(t("memory.delete"))}" aria-label="${escapeAttribute(`${t("memory.delete")}: ${memory.title}`)}" data-memory-id="${escapeAttribute(memory.id)}">
         <i data-lucide="trash-2" aria-hidden="true"></i>
       </button>
     </article>
@@ -3003,8 +3108,14 @@ function getFirebaseMemoriesCollection() {
 
 function setActiveTab(tabName) {
   state.activeTab = tabName;
-  elements.tabs.forEach((item) => item.classList.toggle("is-active", item.dataset.tab === tabName));
+  elements.tabs.forEach((item) => {
+    const isActive = item.dataset.tab === tabName;
+    item.classList.toggle("is-active", isActive);
+    item.setAttribute("aria-pressed", String(isActive));
+  });
+  elements.cardsPanel.setAttribute("aria-label", categoryLabel(tabName));
   renderPanels();
+  elements.pageStatus.textContent = `${t("resultsReady")}: ${categoryLabel(tabName)}`;
 }
 
 function renderPanels() {
@@ -3014,6 +3125,7 @@ function renderPanels() {
 
   if (state.activeTab === "memories") {
     renderMemoryWorkspace();
+    elements.pageStatus.textContent = `${t("resultsReady")}: ${t("category.memories")}`;
     return;
   }
 
@@ -3025,6 +3137,7 @@ function renderPanels() {
         <p>${t("empty.noResults")}</p>
       </div>
     `;
+    elements.pageStatus.textContent = t("empty.noResults");
     paintIcons();
     return;
   }
@@ -3034,6 +3147,7 @@ function renderPanels() {
     .filter((category) => grouped[category]?.length)
     .map((category) => renderCategory(category, grouped[category]))
     .join("");
+  elements.pageStatus.textContent = `${t("resultsReady")}: ${cards.length}`;
   paintIcons();
 }
 
@@ -3099,7 +3213,7 @@ function renderCard(card) {
         </div>
         <h3>${escapeHtml(card.title)}</h3>
         <p>${escapeHtml(card.text)}</p>
-        <a class="card-link" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">
+        <a class="card-link" href="${escapeAttribute(href)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttribute(`${t("source")}: ${card.title}, ${t("newWindow")}`)}">
           ${t("source")}
           <i data-lucide="external-link" aria-hidden="true"></i>
         </a>
@@ -3125,7 +3239,7 @@ function buildDayRail() {
     .map((date) => {
       const active = keyFromDate(date) === keyFromDate(state.date);
       return `
-        <button class="rail-day ${active ? "is-active" : ""}" type="button" data-date="${toInputDate(date)}">
+        <button class="rail-day ${active ? "is-active" : ""}" type="button" data-date="${toInputDate(date)}" aria-pressed="${active}" aria-label="${escapeAttribute(formatAccessibleDate(date))}">
           <span>${formatShortWeekday(date)}</span>
           <strong>${date.getDate()}</strong>
           <small>${formatShortMonth(date)}</small>
@@ -3169,6 +3283,7 @@ function renderSavedDays() {
 function updateSaveButton() {
   const isSaved = state.saved.some((item) => item.key === keyFromDate(state.date));
   elements.saveDay.classList.toggle("is-saved", isSaved);
+  elements.saveDay.setAttribute("aria-pressed", String(isSaved));
   elements.saveDay.innerHTML = isSaved
     ? `<i data-lucide="bookmark-check" aria-hidden="true"></i> ${t("saved")}`
     : `<i data-lucide="bookmark-plus" aria-hidden="true"></i> ${t("save")}`;
@@ -3267,12 +3382,14 @@ function renderAccount() {
   if (state.currentUser) {
     const firstName = state.currentUser.name.split(" ")[0] || t("auth.profile");
     elements.accountButton.title = t("signOut");
+    elements.accountButton.setAttribute("aria-label", `${t("signOut")}: ${firstName}`);
     elements.accountButton.innerHTML = `
       <i data-lucide="log-out" aria-hidden="true"></i>
       ${escapeHtml(firstName)}
     `;
   } else {
     elements.accountButton.title = t("signIn");
+    elements.accountButton.setAttribute("aria-label", t("signIn"));
     elements.accountButton.innerHTML = `
       <i data-lucide="user-round" aria-hidden="true"></i>
       ${t("signIn")}
@@ -3282,16 +3399,33 @@ function renderAccount() {
 }
 
 function openAuth(mode = "login") {
+  if (elements.authModal.hidden) {
+    state.lastFocusedElement = document.activeElement;
+  }
   setAuthMode(mode);
   elements.authModal.hidden = false;
-  elements.authMessage.textContent = "";
+  elements.appShell.inert = true;
+  document.body.classList.add("modal-open");
+  clearAuthError();
   elements.authPassword.value = "";
-  window.setTimeout(() => elements.authEmail.focus(), 0);
+  window.setTimeout(() => {
+    const initialField = mode === "register" ? elements.authName : elements.authEmail;
+    initialField.focus();
+  }, 0);
   paintIcons();
 }
 
 function closeAuth() {
+  if (elements.authModal.hidden) return;
   elements.authModal.hidden = true;
+  elements.appShell.inert = false;
+  document.body.classList.remove("modal-open");
+  const returnTarget = state.lastFocusedElement;
+  state.lastFocusedElement = null;
+  window.setTimeout(() => {
+    const focusTarget = returnTarget?.isConnected ? returnTarget : elements.accountButton;
+    focusTarget?.focus();
+  }, 0);
 }
 
 function setAuthMode(mode) {
@@ -3299,6 +3433,11 @@ function setAuthMode(mode) {
   const isRegister = mode === "register";
   elements.authLoginTab.classList.toggle("is-active", !isRegister);
   elements.authRegisterTab.classList.toggle("is-active", isRegister);
+  elements.authLoginTab.setAttribute("aria-selected", String(!isRegister));
+  elements.authRegisterTab.setAttribute("aria-selected", String(isRegister));
+  elements.authLoginTab.tabIndex = isRegister ? -1 : 0;
+  elements.authRegisterTab.tabIndex = isRegister ? 0 : -1;
+  elements.authPanel.setAttribute("aria-labelledby", isRegister ? "authRegisterTab" : "authLoginTab");
   elements.nameField.hidden = !isRegister;
   elements.authName.required = isRegister;
   elements.authPassword.autocomplete = isRegister ? "new-password" : "current-password";
@@ -3306,6 +3445,55 @@ function setAuthMode(mode) {
     ? `<i data-lucide="user-plus" aria-hidden="true"></i> ${t("register")}`
     : `<i data-lucide="log-in" aria-hidden="true"></i> ${t("signIn")}`;
   paintIcons();
+}
+
+function handleAuthTabKeydown(event) {
+  if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+  event.preventDefault();
+  const nextMode = state.authMode === "login" ? "register" : "login";
+  setAuthMode(nextMode);
+  (nextMode === "register" ? elements.authRegisterTab : elements.authLoginTab).focus();
+}
+
+function handleDocumentKeydown(event) {
+  if (elements.authModal.hidden) return;
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeAuth();
+    return;
+  }
+
+  if (event.key !== "Tab") return;
+  const focusable = [...elements.authModal.querySelectorAll(
+    'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => element.getClientRects().length > 0);
+  if (!focusable.length) return;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (!elements.authModal.contains(document.activeElement)) {
+    event.preventDefault();
+    first.focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function clearAuthError() {
+  elements.authMessage.textContent = "";
+  elements.authName.removeAttribute("aria-invalid");
+  elements.authEmail.removeAttribute("aria-invalid");
+  elements.authPassword.removeAttribute("aria-invalid");
+}
+
+function showAuthError(message, fields = []) {
+  elements.authMessage.textContent = message;
+  fields.forEach((field) => field.setAttribute("aria-invalid", "true"));
 }
 
 async function handleAuthSubmit(event) {
@@ -3316,7 +3504,7 @@ async function handleAuthSubmit(event) {
 
   if (!email || !password) return;
   elements.authSubmit.disabled = true;
-  elements.authMessage.textContent = "";
+  clearAuthError();
 
   try {
     if (state.firebase.ready) {
@@ -3338,7 +3526,7 @@ async function handleAuthSubmit(event) {
 
     if (state.authMode === "register") {
       if (state.users.some((user) => user.email === email)) {
-        elements.authMessage.textContent = t("auth.emailExists");
+        showAuthError(t("auth.emailExists"), [elements.authEmail]);
         return;
       }
 
@@ -3359,13 +3547,18 @@ async function handleAuthSubmit(event) {
     const passwordHash = await digestPassword(password);
     const user = state.users.find((item) => item.email === email && item.passwordHash === passwordHash);
     if (!user) {
-      elements.authMessage.textContent = t("auth.invalidCredentials");
+      showAuthError(t("auth.invalidCredentials"), [elements.authEmail, elements.authPassword]);
       return;
     }
 
     setCurrentUser(user);
   } catch (error) {
-    elements.authMessage.textContent = getFirebaseErrorMessage(error);
+    const invalidFields = ["auth/invalid-email", "auth/invalid-credential"].includes(error?.code)
+      ? [elements.authEmail, elements.authPassword]
+      : error?.code === "auth/email-already-in-use"
+      ? [elements.authEmail]
+      : [];
+    showAuthError(getFirebaseErrorMessage(error), invalidFields);
   } finally {
     elements.authSubmit.disabled = false;
   }
@@ -3373,12 +3566,12 @@ async function handleAuthSubmit(event) {
 
 async function handleGoogleSignIn() {
   if (!state.firebase.ready) {
-    elements.authMessage.textContent = t("auth.network");
+    showAuthError(t("auth.network"));
     return;
   }
 
   elements.authGoogle.disabled = true;
-  elements.authMessage.textContent = "";
+  clearAuthError();
 
   try {
     const provider = new state.firebase.api.GoogleAuthProvider();
@@ -3387,7 +3580,7 @@ async function handleGoogleSignIn() {
     await saveFirebaseUserProfile(credential.user);
     await applyFirebaseUser(credential.user);
   } catch (error) {
-    elements.authMessage.textContent = getFirebaseErrorMessage(error);
+    showAuthError(getFirebaseErrorMessage(error));
   } finally {
     elements.authGoogle.disabled = false;
   }
@@ -3420,6 +3613,8 @@ async function signOut() {
 }
 
 function setLoadingState(date) {
+  elements.cardsPanel.setAttribute("aria-busy", "true");
+  elements.pageStatus.textContent = t("loadingDay");
   elements.weekdayLabel.textContent = formatWeekday(date);
   elements.dayTitle.textContent = formatDayTitle(date);
   elements.daySummary.textContent = t("loadingDay");
@@ -3578,6 +3773,15 @@ function pad(value) {
 
 function formatDayTitle(date) {
   return new Intl.DateTimeFormat(currentLocale(), { day: "numeric", month: "long" }).format(date);
+}
+
+function formatAccessibleDate(date) {
+  return new Intl.DateTimeFormat(currentLocale(), {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
 }
 
 function formatWeekday(date) {
